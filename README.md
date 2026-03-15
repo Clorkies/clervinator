@@ -1,13 +1,17 @@
-# The Clervinator
+<p align="center">
+  <img src="src/main/resources/static/favicon.svg" alt="Clervinator Logo" width="120"/>
+</p>
 
-![Java Version](https://img.shields.io/badge/Java-25-orange?style=for-the-badge&logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-Framework-brightgreen?style=for-the-badge&logo=springboot)
-![Build](https://img.shields.io/badge/Build-Maven-blue?style=for-the-badge&logo=apache-maven)
-![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)
+<h1 align="center">Clervinator</h1>
 
-**The Clervinator** is a web-based, pure interpreter for the **LEXOR** programming language, built with **Spring Boot** to provide an interactive, real-time playground for code execution and diagnostics.
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-25-orange?style=for-the-badge&logo=openjdk" />
+  <img src="https://img.shields.io/badge/Spring_Boot-Framework-brightgreen?style=for-the-badge&logo=springboot" />
+  <img src="https://img.shields.io/badge/Build-Maven-blue?style=for-the-badge&logo=apache-maven" />
+  <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge" />
+</p>
 
----
+**Clervinator** is a web-based, pure interpreter for the **LEXOR** programming language, built with **Spring Boot** to provide an interactive, real-time playground for code execution and diagnostics.
 
 ## Features
 
