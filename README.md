@@ -18,7 +18,7 @@
 
 ## Tech Stack
 
-- **Frontend:** HTML5, TailwindCSS, Monaco Editor
+- **Frontend:** HTML5, TailwindCSS, Monaco Code Editor
 - **Backend:** Spring Boot (Java 25)
 - **Interpreter Logic:** Pure Java Implementation
 
@@ -35,7 +35,7 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/your-username/clervinator.git](https://github.com/your-username/clervinator.git)
+   git clone https://github.com/your-username/clervinator.git
    cd clervinator
    ```
 
