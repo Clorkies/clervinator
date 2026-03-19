@@ -11,7 +11,12 @@
   <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge" />
 </p>
 
-**Clervinator** is a web-based, pure interpreter for the **LEXOR** programming language, built with **Spring Boot** to provide an interactive, real-time playground for code execution and diagnostics.
+<p align="center">
+  <strong>Website Link: </strong> <a href="https://clervinator.up.railway.app">clervinator.up.railway.app</a>
+</p>
+
+
+**Clervinator** is a high-performance, web-based interpreter for the **LEXOR** programming language. Built on the **Spring Boot** ecosystem, it provides an interactive, real-time playground designed for seamless code execution, syntax validation, and deep diagnostics.
 
 ## Features
 
@@ -25,10 +30,26 @@
 - **Frontend:** HTML5, TailwindCSS, Monaco Code Editor
 - **Backend:** Spring Boot (Java 25)
 - **Interpreter Logic:** Pure Java Implementation
+- **Build Tool:** Maven
 
 ---
 
-## Getting Started
+## Usage
+
+1. Open the web UI in your browser.
+2. Paste or write LEXOR code in the editor.
+3. Run/interpret the code.
+4. Review output and diagnostics in the results panel.
+
+## Project Structure (high-level)
+
+Typical Spring Boot layout:
+
+- `src/main/java/` — Spring Boot app + interpreter implementation
+- `src/main/resources/` — templates/static assets/config
+- `src/test/` — unit/integration tests
+
+## Running it Locally
 
 ### Prerequisites
 
@@ -53,20 +74,6 @@
 
 > If your application is configured to run on a different port, check `application.properties` / `application.yml`.
 
-## Usage
-
-1. Open the web UI in your browser.
-2. Paste or write LEXOR code in the editor.
-3. Run/interpret the code.
-4. Review output and diagnostics in the results panel.
-
-## Project Structure (high-level)
-
-Typical Spring Boot layout:
-
-- `src/main/java/` — Spring Boot app + interpreter implementation
-- `src/main/resources/` — templates/static assets/config
-- `src/test/` — unit/integration tests
 
 <hr />
 
