@@ -1,9 +1,16 @@
 package com.citu.lexor_interpreter.lexer;
 
-public class LexerException extends RuntimeException {
+import com.citu.lexor_interpreter.lexer.token.TokenPosition;
 
-    public LexerException(String message) {
-        super(message);
+public class LexerException extends RuntimeException {
+    private final TokenPosition position;
+    private String offendingLexeme;
+
+
+    public LexerException(String message, TokenPosition position, String offendingLexeme) {
+        super("Lexer error at " + position + ": " + message + " (offending lexeme: '" + offendingLexeme + "')");
+        this.position = position;
+        this.offendingLexeme = offendingLexeme;
     }
-    
+
 }

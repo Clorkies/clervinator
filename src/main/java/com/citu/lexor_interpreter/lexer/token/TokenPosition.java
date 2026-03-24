@@ -9,7 +9,7 @@ public record TokenPosition(int line, int col) {
 
     public TokenPosition {
         if (line < 1 || col < 1) {
-            throw new LexerException("Line and column must be greater than 0");
+            throw new LexerException("Line and column must be greater than 0", this, null);
         }
     }
 
