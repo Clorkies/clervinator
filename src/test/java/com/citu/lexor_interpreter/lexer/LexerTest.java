@@ -75,7 +75,7 @@ class LexerTest {
     void lex_literals_intFloatCharStringBool() {
         String source = """
             DECLARE INT a=123
-            DECLARE FLOAT b=10.5
+            DECLARE FLOAT b=10.0
             DECLARE CHAR c='z'
             DECLARE BOOL t="TRUE"
             PRINT: "hello"
@@ -84,10 +84,25 @@ class LexerTest {
         List<Token> tokens = new Lexer().lex(source);
 
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.INT_LITERAL && Integer.valueOf(123).equals(t.literalValue())));
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(10.5).equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(10.0).equals(t.literalValue())));
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.CHAR_LITERAL && Character.valueOf('z').equals(t.literalValue())));
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.BOOL_LITERAL && Boolean.TRUE.equals(t.literalValue())));
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.STRING_LITERAL && "hello".equals(t.literalValue())));
+    }
+
+    @Test
+    void lex_FloatDoubleEdgeCases() {
+        String source = """
+            DECLARE FLOAT preDigit=.5
+            DECLARE FLOAT postDigit=5.
+        """;
+
+        List<Token> tokens = new Lexer().lex(source);
+
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(.5).equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(5.0).equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(5.0).equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(0.5).equals(t.literalValue())));
     }
 
     @Test
