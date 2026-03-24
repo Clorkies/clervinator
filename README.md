@@ -49,6 +49,10 @@ Typical Spring Boot layout:
 - `src/main/resources/` — templates/static assets/config
 - `src/test/` — unit/integration tests
 
+For package ownership and interpreter layer boundaries, see:
+
+- `docs/ARCHITECTURE.md`
+
 ## Running it Locally
 
 ### Prerequisites
