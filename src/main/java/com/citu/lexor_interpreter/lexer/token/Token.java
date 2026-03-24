@@ -11,12 +11,14 @@ public record Token(
     public Token {
         if (type == null) throw new LexerException("Token type cannot be null", position, debugValue());
         if (lexeme == null) throw new LexerException("Token value cannot be null", position, debugValue());
-        if (literalValue == null) throw new LexerException("Token literal value cannot be null", position, debugValue());
         if (position == null) throw new LexerException("Token position cannot be null", position, debugValue());
     }
     
+    public boolean hasLiteral() {
+        return literalValue != null;
+    }
 
     public String debugValue() {
-        return literalValue == null ? "null" : literalValue.toString();
+        return hasLiteral() ? literalValue.toString(): lexeme;
     }
 }
