@@ -1,7 +1,7 @@
-package com.cit.lexor.controller;
+package com.citu.lexor_interpreter.controller;
 
-import com.cit.lexor.model.ExecuteResponse;
-import com.cit.lexor.service.InterpreterService;
+import com.citu.lexor_interpreter.model.ExecuteResponse;
+import com.citu.lexor_interpreter.service.InterpreterService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

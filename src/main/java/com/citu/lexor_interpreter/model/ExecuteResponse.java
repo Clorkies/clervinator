@@ -1,4 +1,4 @@
-package com.cit.lexor.model;
+package com.citu.lexor_interpreter.model;
 
 import java.util.List;
 

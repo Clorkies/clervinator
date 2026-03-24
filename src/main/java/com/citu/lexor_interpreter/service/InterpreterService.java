@@ -1,6 +1,6 @@
-package com.cit.lexor.service;
+package com.citu.lexor_interpreter.service;
 
-import com.cit.lexor.model.ExecuteResponse;
+import com.citu.lexor_interpreter.model.ExecuteResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
