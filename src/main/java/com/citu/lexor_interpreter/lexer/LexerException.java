@@ -8,4 +8,8 @@ public class LexerException extends RuntimeException {
         super("Lexer error at " + position + ": " + message + " (offending lexeme: '" + offendingLexeme + "')");
     }
 
+    public LexerException(String message) {
+        super(message);
+    }
+
 }

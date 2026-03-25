@@ -9,10 +9,11 @@ public record Token(
     TokenPosition position
 ){
     public Token {
-        if (type == null) throw new LexerException("Token type cannot be null", position, debugValue());
-        if (lexeme == null) throw new LexerException("Token value cannot be null", position, debugValue());
-        if (position == null) throw new LexerException("Token position cannot be null", position, debugValue());
+        if (type == null) throw new LexerException("Token type cannot be null", position, lexeme);
+        if (lexeme == null) throw new LexerException("Token value cannot be null", position, "null");
+        if (position == null) throw new LexerException("Token position cannot be null");
     }
+
     
     public boolean hasLiteral() {
         return literalValue != null;
