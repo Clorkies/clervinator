@@ -50,7 +50,7 @@ public class Parser {
     }
 
     private boolean check(TokenType type) {
-        return !isAtEnd() && peek().type() == type;
+        return peek().type() == type;
     }
 
     private boolean match(TokenType... expectedTypes) {
@@ -104,10 +104,6 @@ public class Parser {
             return new VariableNode(previous().lexeme());
         }
 
-        if (match(TokenType.NEWLINE)) {
-            return new NewlineNode();
-        }
-
         if (match(TokenType.LPAREN)) {
             ExpressionNode inner = parseExpression();
             consume(TokenType.RPAREN, "expected ')' after grouped expression");
@@ -149,13 +145,20 @@ public class Parser {
         consume(TokenType.COLON, "expected ':' after PRINT");
 
         List<ExpressionNode> expressions = new ArrayList<>();
-        expressions.add(parseExpression());
+        expressions.add(parsePrintExpression());
 
         while (match(TokenType.CONCAT)) {
-            expressions.add(parseExpression());
+            expressions.add(parsePrintExpression());
         }
 
         return new PrintNode(expressions);
+    }
+
+    private ExpressionNode parsePrintExpression() {
+        if (match(TokenType.NEWLINE)) {
+            return new NewlineNode();
+        }
+        return parseExpression();
     }
 
     private List<StatementNode> parseAssignmentStatement() {
@@ -199,6 +202,9 @@ public class Parser {
     }
 
     public Parser(List<Token> tokens) {
+        if (tokens == null || tokens.isEmpty()) {
+            throw new ParserException("Parser requires a non-empty token list.");
+        }
         this.tokens = tokens;
         this.currentIndex = 0;
     }
