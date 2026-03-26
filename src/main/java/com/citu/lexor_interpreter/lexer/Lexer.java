@@ -135,8 +135,8 @@ public class Lexer {
         }
 
         // Floats must look like: <digits>.<digits>
-        // - ".5" is rejected because there are no leading digits.
-        // - "5." is rejected because there are no digits after the dot.
+        // - ".5" does not reach this method; '.' is treated as an unexpected character in scanToken().
+        // - "5." is rejected here because there are no digits after the dot.
         if (peek() == '.') {
             if (!isDigit(peekNext())) {
                 throw error("Malformed float literal; expected digits after decimal point", currentLexeme());
