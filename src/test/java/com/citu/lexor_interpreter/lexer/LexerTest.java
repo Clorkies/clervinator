@@ -83,26 +83,31 @@ class LexerTest {
 
         List<Token> tokens = new Lexer().lex(source);
 
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.INT_LITERAL && Integer.valueOf(123).equals(t.literalValue())));
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(10.0).equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.INT_LITERAL && "123".equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && "10.0".equals(t.literalValue())));
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.CHAR_LITERAL && Character.valueOf('z').equals(t.literalValue())));
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.BOOL_LITERAL && Boolean.TRUE.equals(t.literalValue())));
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.STRING_LITERAL && "hello".equals(t.literalValue())));
     }
 
     @Test
-    void lex_FloatDoubleEdgeCases() {
+    void lex_decimalExplicitness_requiresDigitsAroundDot() {
         String source = """
-            DECLARE FLOAT preDigit=.5
-            DECLARE FLOAT postDigit=5.
+            DECLARE FLOAT c=0.5
+            DECLARE FLOAT d=5.0
+            DECLARE FLOAT e=00.50
+            DECLARE INT x=0012
         """;
+
+        assertThrows(LexerException.class, () -> new Lexer().lex("DECLARE FLOAT a=.5"));
+        assertThrows(LexerException.class, () -> new Lexer().lex("DECLARE FLOAT b=5."));
 
         List<Token> tokens = new Lexer().lex(source);
 
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(.5).equals(t.literalValue())));
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(5.0).equals(t.literalValue())));
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(5.0).equals(t.literalValue())));
-        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && Double.valueOf(0.5).equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && "0.5".equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && "5.0".equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.FLOAT_LITERAL && "00.50".equals(t.literalValue())));
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.INT_LITERAL && "0012".equals(t.literalValue())));
     }
 
     @Test

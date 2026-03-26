@@ -201,7 +201,7 @@ START FOR
 END FOR
 ```
 
-#### b) REPEAT WHEN (<BOOL expression>)
+#### b) REPEAT WHEN ()
 
 ```text
 REPEAT WHEN (<BOOL expression>)

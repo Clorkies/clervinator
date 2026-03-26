@@ -11,10 +11,12 @@ import com.citu.lexor_interpreter.lexer.token.TokenType;
 public class Lexer {
     private static final Map<String, TokenType> KEYWORDS = Map.ofEntries(
         Map.entry("DECLARE", TokenType.DECLARE),
+
         Map.entry("INT", TokenType.INT_TYPE),
         Map.entry("CHAR", TokenType.CHAR_TYPE),
         Map.entry("BOOL", TokenType.BOOL_TYPE),
         Map.entry("FLOAT", TokenType.FLOAT_TYPE),
+
         Map.entry("PRINT", TokenType.PRINT),
         Map.entry("SCAN", TokenType.SCAN),
         Map.entry("FOR", TokenType.FOR),
@@ -24,7 +26,16 @@ public class Lexer {
         Map.entry("ELSE", TokenType.ELSE),
         Map.entry("AND", TokenType.AND),
         Map.entry("OR", TokenType.OR),
-        Map.entry("NOT", TokenType.NOT)
+        Map.entry("NOT", TokenType.NOT),
+        
+        Map.entry("START_SCRIPT", TokenType.START_SCRIPT),
+        Map.entry("END_SCRIPT", TokenType.END_SCRIPT),
+        Map.entry("START_FOR", TokenType.START_FOR),
+        Map.entry("END_FOR", TokenType.END_FOR),
+        Map.entry("START_IF", TokenType.START_IF),
+        Map.entry("END_IF", TokenType.END_IF),
+        Map.entry("START_REPEAT", TokenType.START_REPEAT),
+        Map.entry("END_REPEAT", TokenType.END_REPEAT)
     );
 
     private String code;
@@ -123,21 +134,25 @@ public class Lexer {
             advance();
         }
 
-        boolean isFloat = false;
-        if (peek() == '.' && isDigit(peekNext())) {
-            isFloat = true;
+        // Floats must look like: <digits>.<digits>
+        // - ".5" does not reach this method; '.' is treated as an unexpected character in scanToken().
+        // - "5." is rejected here because there are no digits after the dot.
+        if (peek() == '.') {
+            if (!isDigit(peekNext())) {
+                throw error("Malformed float literal; expected digits after decimal point", currentLexeme());
+            }
+
+            // Consume '.'
             advance();
             while (isDigit(peek())) {
                 advance();
             }
+            addToken(TokenType.FLOAT_LITERAL, currentLexeme());
+            return;
         }
 
-        String value = currentLexeme();
-        if (isFloat) {
-            addToken(TokenType.FLOAT_LITERAL, Double.parseDouble(value));
-        } else {
-            addToken(TokenType.INT_LITERAL, Integer.parseInt(value));
-        }
+        // Preserve explicitness/zeros by storing the exact numeric lexeme text.
+        addToken(TokenType.INT_LITERAL, currentLexeme());
     }
 
     private void stringOrBoolLiteral() {
