@@ -2,7 +2,6 @@ package com.citu.lexor_interpreter.interpreter;
 
 import com.citu.lexor_interpreter.parser.ast.*;
 import com.citu.lexor_interpreter.parser.ast.expression.*;
-import java.util.stream.Collectors;
 
 public class Interpreter {
     private final Environment environment = new Environment();
