@@ -8,6 +8,16 @@ import java.util.List;
 /**
  * Placeholder only
  */
+import com.citu.lexor_interpreter.lexer.Lexer;
+import com.citu.lexor_interpreter.lexer.LexerException;
+import com.citu.lexor_interpreter.lexer.token.Token;
+import com.citu.lexor_interpreter.parser.Parser;
+import com.citu.lexor_interpreter.parser.ParserException;
+import com.citu.lexor_interpreter.parser.ast.ProgramNode;
+import com.citu.lexor_interpreter.interpreter.Interpreter;
+
+import java.util.ArrayList;
+
 @Service
 public class InterpreterService {
 
@@ -15,6 +25,32 @@ public class InterpreterService {
         if (code == null || code.isBlank()) {
             return ExecuteResponse.withError("No code provided.");
         }
-        return ExecuteResponse.success("Hello from LEXOR", List.of());
+
+        try {
+            // Lexing
+            Lexer lexer = new Lexer();
+            List<Token> tokens = lexer.lex(code);
+
+            // Parsing
+            Parser parser = new Parser(tokens);
+            ProgramNode program = parser.parseProgram();
+
+            // Interpreting
+            Interpreter interpreter = new Interpreter();
+            String result = interpreter.interpret(program);
+
+            // Prepare tokens for response (optional but good for debugging)
+            List<Object> responseTokens = new ArrayList<>(tokens);
+
+            return ExecuteResponse.success(result, responseTokens);
+
+        } catch (LexerException | ParserException e) {
+            // Catch custom errors and return them to the user nicely
+            return ExecuteResponse.withError(e.getMessage());
+        } catch (Exception e) {
+            // Safety: Catch unexpected system errors so the UI doesn't crash
+            return ExecuteResponse.withError("System error: " + e.getClass().getSimpleName() + " - Please check your code.");
+        }
     }
 }
+
