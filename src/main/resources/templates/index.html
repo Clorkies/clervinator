@@ -762,7 +762,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
-    <script>
+    <script th:inline="none">
         const SAMPLES = {
             hello: {
                 filename: 'hello_world.lexor',
@@ -779,6 +779,150 @@
             empty: {
                 filename: 'untitled.lexor',
                 code: ''
+            },
+            'store-receipt': {
+                filename: 'store_receipt.lexor',
+                code: `%% ===================================
+%% LEXOR Store Receipt Program
+%% Covers all Increment 1 features
+%% ===================================
+SCRIPT AREA
+START SCRIPT
+
+%% --- Store Info ---
+DECLARE CHAR storeName='B'
+DECLARE INT receiptNum=1042
+DECLARE BOOL memberDiscount="TRUE"
+DECLARE INT line1, line2, line3
+DECLARE INT refNum
+
+%% --- Item details (unit prices as scaled INT, x100) ---
+DECLARE INT item1Price, item2Price, item3Price
+DECLARE INT item1Qty, item2Qty, item3Qty
+
+DECLARE INT subtotal
+DECLARE INT tax
+DECLARE INT total
+
+item1Price=299
+item2Price=150
+item3Price=499
+
+item1Qty=2
+item2Qty=1
+item3Qty=3
+
+%% --- Compute line totals ---
+line1=item1Qty
+line2=item2Qty
+line3=item3Qty
+
+%% --- Tax rate flag and receipt number copy ---
+refNum=receiptNum
+
+%% --- Header ---
+PRINT: "================================" & $
+PRINT: "           BISAYA MART          " & $
+PRINT: "      Your Neighborhood Store   " & $
+PRINT: "================================" & $
+PRINT: "Receipt [#]" & refNum & $
+PRINT: "Member Discount: " & memberDiscount & $
+PRINT: "--------------------------------" & $
+
+%% --- Items ---
+PRINT: "ITEM              QTY   PRICE  " & $
+PRINT: "--------------------------------" & $
+PRINT: "Bottled Water     " & item1Qty & "     P" & item1Price & $
+PRINT: "Bread Loaf        " & item2Qty & "     P" & item2Price & $
+PRINT: "Instant Noodles   " & item3Qty & "     P" & item3Price & $
+PRINT: "--------------------------------" & $
+
+%% --- Summary ---
+subtotal=1795
+
+tax=215
+
+total=2010
+
+PRINT: "Subtotal:              P" & subtotal & $
+PRINT: "VAT:                   P" & tax & $
+PRINT: "================================" & $
+PRINT: "TOTAL:                 P" & total & $
+PRINT: "================================" & $
+PRINT: "   Thank you for shopping at   " & $
+PRINT: "          Bisaya Mart          " & $
+PRINT: "================================"
+
+END SCRIPT
+`
+            },
+            'student-report-card': {
+                filename: 'student_report_card.lexor',
+                code: `%% ============================================
+%% LEXOR Program: Student Report Card Printout
+%% Covers all Increment 1 targets
+%% ============================================
+SCRIPT AREA
+START SCRIPT
+
+%% --- Student Information ---
+DECLARE CHAR section='A'
+DECLARE INT studentId=2024001
+DECLARE INT gradeLevel=11
+DECLARE BOOL honor="TRUE"
+
+%% --- Subject Grades (stored as whole numbers) ---
+DECLARE INT mathGrade, sciGrade, engGrade
+DECLARE INT filipinoGrade, histGrade, peGrade
+
+%% --- Remarks ---
+DECLARE CHAR remarkCode='P'
+DECLARE BOOL promoted="TRUE"
+
+mathGrade=92
+sciGrade=88
+engGrade=95
+filipinoGrade=90
+histGrade=85
+peGrade=97
+
+
+%% --- Header ---
+PRINT: "============================================" & $
+PRINT: "     REPUBLIC OF THE PHILIPPINES           " & $
+PRINT: "   DEPARTMENT OF EDUCATION - REGION VI     " & $
+PRINT: "         BACOLOD NATIONAL HIGH SCHOOL      " & $
+PRINT: "============================================" & $
+PRINT: "            REPORT CARD [#]SY 2024-2025    " & $
+PRINT: "============================================" & $
+
+%% --- Student Details ---
+PRINT: "Student ID  : " & studentId & $
+PRINT: "Grade Level : " & gradeLevel & $
+PRINT: "Section     : " & section & $
+PRINT: "With Honors : " & honor & $
+PRINT: "--------------------------------------------" & $
+
+%% --- Grades Table ---
+PRINT: "SUBJECT              FINAL GRADE" & $
+PRINT: "--------------------------------------------" & $
+PRINT: "Mathematics          " & mathGrade & $
+PRINT: "Science              " & sciGrade & $
+PRINT: "English              " & engGrade & $
+PRINT: "Filipino             " & filipinoGrade & $
+PRINT: "Araling Panlipunan   " & histGrade & $
+PRINT: "MAPEH/PE             " & peGrade & $
+PRINT: "--------------------------------------------" & $
+
+%% --- Remarks ---
+PRINT: "Remark Code : [[] " & remarkCode & " []]" & $
+PRINT: "Promoted    : " & promoted & $
+PRINT: "============================================" & $
+PRINT: "  [[] P []] = Passed   [[] F []] = Failed  " & $
+PRINT: "============================================"
+
+END SCRIPT
+                `
             }
         };
 
