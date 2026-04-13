@@ -390,6 +390,34 @@
             color: var(--text-muted);
             margin-bottom: 0.25rem;
         }
+        .docs-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .docs-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-panel);
+            border-radius: 0.5rem;
+            padding: 0.42rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-main);
+            background-color: rgba(24, 31, 38, 0.9);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.18s ease;
+        }
+        .docs-link-btn:hover {
+            color: var(--text-main);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
         .info-card-text {
             font-size: 0.9rem;
             color: var(--text-muted);
@@ -532,6 +560,9 @@
             }
             .docs-row-two-col {
                 grid-template-columns: 1fr;
+            }
+            .docs-link-btn {
+                width: 100%;
             }
             .editor-output-split {
                 flex-direction: column;
@@ -679,7 +710,12 @@
         <section id="docs" class="mb-3">
             <div id="grammar" class="card-lexor mb-4 w-full">
                 <div class="card-body p-4">
-                    <div class="info-card-title">LEXOR Core grammar</div>
+                    <div class="docs-card-header">
+                        <div class="info-card-title">LEXOR Core grammar</div>
+                        <a class="docs-link-btn" href="/Language_Specifications_of_Lexor.pdf" target="_blank" rel="noopener noreferrer">
+                            View Detailed Documentation
+                        </a>
+                    </div>
                     <hr class="border-t-1 my-4 w-full border-[var(--border-panel)]" />
                     <p class="info-card-text mb-2">
                         LEXOR focuses on readable, beginner-friendly constructs with a fixed program layout.
