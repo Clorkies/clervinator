@@ -380,6 +380,94 @@
             text-transform: uppercase;
             letter-spacing: 0.12em;
         }
+        .site-footer {
+            margin-top: 3rem;
+            border-top: 1px solid rgba(48, 54, 61, 0.65);
+            background: linear-gradient(180deg, rgba(13, 17, 23, 0.4) 0%, rgba(13, 17, 23, 0.85) 100%);
+        }
+        .site-footer-inner {
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 2.25rem 1.75rem 1.75rem;
+        }
+        .footer-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .footer-brand-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: rgba(136, 146, 176, 0.95);
+            margin-bottom: 0.5rem;
+        }
+        .footer-headline {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 0.5rem;
+            line-height: 1.35;
+        }
+        .footer-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+            max-width: 28rem;
+            line-height: 1.55;
+        }
+        .footer-social {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-shrink: 0;
+        }
+        .footer-social a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-panel);
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+        .footer-social a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(88, 166, 255, 0.08);
+        }
+        .footer-social a i {
+            font-size: 1rem;
+        }
+        .footer-divider {
+            border: none;
+            border-top: 1px solid rgba(48, 54, 61, 0.55);
+            margin: 1.75rem 0 1.25rem;
+        }
+        .footer-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .footer-bottom a {
+            color: var(--text);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .footer-bottom a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
         @media (max-width: 767.98px) {
             .main-content {
                 padding-inline: 1.1rem;
@@ -402,6 +490,16 @@
             .output-pane {
                 border-top: 1px solid var(--border-panel);
                 min-height: 220px;
+            }
+            .site-footer-inner {
+                padding-inline: 1.1rem;
+            }
+            .footer-top {
+                flex-direction: column;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -566,6 +664,35 @@
             </div>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-top">
+                <div>
+                    <p class="footer-brand-label">Clervinator</p>
+                    <p class="footer-headline">Built for learning LEXOR in the browser</p>
+                    <p class="footer-desc">
+                        Run sample programs, experiment with syntax, and explore the language. Source code and issues live on GitHub.
+                    </p>
+                </div>
+                <div class="footer-social" aria-label="Repository">
+                    <a href="https://github.com/Clorkies/clervinator" target="_blank" rel="noopener noreferrer" title="Clervinator on GitHub" aria-label="View Clervinator on GitHub">
+                        <i class="bi bi-github" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+            <hr class="footer-divider"/>
+            <div class="footer-bottom">
+                <span>© 2026 Clervinator. Open source under the project license.</span>
+                <span>
+                    Crafted by
+                    <a href="https://github.com/Clorkies" target="_blank" rel="noopener noreferrer">Clorky</a>
+                    ·
+                    <a href="https://github.com/jermochi" target="_blank" rel="noopener noreferrer">jermochi</a>
+                </span>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
     <script>
