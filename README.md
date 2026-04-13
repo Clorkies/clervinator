@@ -20,6 +20,10 @@
 
 ## Features
 
+<p align="center">
+  <img src="https://i.imgur.com/jKyJrb7.png"/>
+</p>
+
 - **Pure Interpreter:** Full execution engine for the LEXOR programming language specification.
 - **Web-Based Playground:** Interactive web interface for writing and running code in real-time.
 - **Real-Time Diagnostics:** Detailed error reporting and execution feedback for developers.
@@ -31,6 +35,12 @@
 - **Backend:** Spring Boot (Java 25)
 - **Interpreter Logic:** Pure Java Implementation
 - **Build Tool:** Maven
+
+## Documentations
+
+<p align="center">
+  <img src="https://i.imgur.com/YfSl9Yh.png"/>
+</p>
 
 ---
 
