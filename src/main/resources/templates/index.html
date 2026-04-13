@@ -747,26 +747,25 @@
                 return window.matchMedia('(max-width: 767.98px)').matches;
             }
 
-            resizer.addEventListener('mousedown', function (e) {
+            function startDrag(clientX) {
                 if (isNarrowLayout()) return;
-                e.preventDefault();
                 dragging = true;
                 resizer.classList.add('is-dragging');
                 document.body.style.cursor = 'col-resize';
                 document.body.style.userSelect = 'none';
-            });
+            }
 
-            document.addEventListener('mousemove', function (e) {
+            function moveDrag(clientX) {
                 if (!dragging || isNarrowLayout()) return;
                 const rect = split.getBoundingClientRect();
                 const w = rect.width;
                 if (w <= 0) return;
-                const x = e.clientX - rect.left;
+                const x = clientX - rect.left;
                 const pct = (x / w) * 100;
                 applySplit(pct, true);
-            });
+            }
 
-            document.addEventListener('mouseup', function () {
+            function endDrag() {
                 if (!dragging) return;
                 dragging = false;
                 resizer.classList.remove('is-dragging');
@@ -777,7 +776,36 @@
                         editor.layout();
                     });
                 }
+            }
+
+            resizer.addEventListener('mousedown', function (e) {
+                if (isNarrowLayout()) return;
+                e.preventDefault();
+                startDrag(e.clientX);
             });
+
+            document.addEventListener('mousemove', function (e) {
+                moveDrag(e.clientX);
+            });
+
+            document.addEventListener('mouseup', endDrag);
+
+            resizer.addEventListener('touchstart', function (e) {
+                if (isNarrowLayout()) return;
+                e.preventDefault();
+                const t = e.touches[0];
+                startDrag(t.clientX);
+            }, { passive: false });
+
+            document.addEventListener('touchmove', function (e) {
+                if (!dragging) return;
+                e.preventDefault();
+                const t = e.touches[0];
+                moveDrag(t.clientX);
+            }, { passive: false });
+
+            document.addEventListener('touchend', endDrag);
+            document.addEventListener('touchcancel', endDrag);
 
             resizer.addEventListener('dblclick', function () {
                 if (isNarrowLayout()) return;
