@@ -74,16 +74,45 @@
             border-color: var(--accent);
             background-color: rgba(22, 27, 34, 1);
         }
-        .editor-wrapper {
-            height: 380px;
+        .editor-output-split {
+            display: flex;
+            align-items: stretch;
+            min-height: 380px;
             border: 1px solid var(--border-panel);
             border-radius: 10px;
+            overflow: hidden;
+            background: var(--bg-editor);
+        }
+        .editor-pane {
+            flex: 1 1 50%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .output-pane {
+            flex: 1 1 50%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-console);
+            border-left: 1px solid var(--border-panel);
+        }
+        .editor-wrapper {
+            flex: 1;
+            min-height: 0;
+            border: none;
+            border-radius: 0;
             overflow: hidden;
             background: var(--bg-editor);
         }
         #lexor-editor {
             width: 100%;
             height: 100%;
+        }
+        .output-pane .console-label {
+            padding: 0.65rem 1rem 0.35rem;
+            margin-bottom: 0;
+            flex-shrink: 0;
         }
         .console-box {
             background: var(--bg-console);
@@ -97,6 +126,14 @@
             padding: 1.25rem 1.5rem;
             white-space: pre-wrap;
             word-break: break-all;
+        }
+        .output-pane .console-box {
+            flex: 1;
+            min-height: 0;
+            max-height: none;
+            border: none;
+            border-radius: 0;
+            padding: 0.75rem 1rem 1rem;
         }
         .console-box .output-line {
             color: var(--text);
@@ -217,9 +254,14 @@
             padding: 0.75rem 0 1rem;
             margin-bottom: 0.5rem;
         }
+        .layout-max {
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
         .main-content {
             padding: 1rem 1.75rem 2.5rem;
-            max-width: 1100px;
+            max-width: 1400px;
         }
         .app-hero {
             text-align: center;
@@ -264,6 +306,11 @@
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1rem;
+        }
+        .docs-row-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
         .info-card-title {
@@ -315,12 +362,24 @@
             .main-content {
                 padding-inline: 1.1rem;
             }
+            .docs-row-two-col {
+                grid-template-columns: 1fr;
+            }
+            .editor-output-split {
+                flex-direction: column;
+                min-height: 0;
+            }
+            .output-pane {
+                border-left: none;
+                border-top: 1px solid var(--border-panel);
+                min-height: 220px;
+            }
         }
     </style>
 </head>
 <body>
     <nav class="navbar-lexor">
-        <div class="max-w-5xl mx-auto flex items-center justify-between px-4">
+        <div class="layout-max flex items-center justify-between px-4">
             <div class="flex items-center gap-2">
                 <span class="badge-pill">
                     <span class="chip-dot mr-1"></span> Clervinator
@@ -341,7 +400,7 @@
         </div>
     </nav>
 
-    <main class="main-content max-w-5xl mx-auto px-4">
+    <main class="main-content layout-max px-4">
         <section class="app-hero">
             <div class="app-hero-logo">
                 <img src="/favicon.svg" alt="Clervinator logo">
@@ -401,21 +460,42 @@
                         </button>
                     </div>
                 </div>
-                <div class="editor-wrapper mt-2">
-                    <div id="lexor-editor"></div>
+                <div class="editor-output-split mt-2">
+                    <div class="editor-pane">
+                        <div class="editor-wrapper">
+                            <div id="lexor-editor"></div>
+                        </div>
+                    </div>
+                    <div class="output-pane">
+                        <div class="console-label">Output</div>
+                        <div id="console" class="console-box" role="log" aria-live="polite"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card-lexor mb-4">
-            <div class="card-body p-4">
-                <div class="console-label mb-3">Output</div>
-                <div id="console" class="console-box" role="log" aria-live="polite"></div>
-            </div>
-        </div>
-
         <section id="docs" class="mb-3">
-            <div class="info-grid">
+            <div id="grammar" class="card-lexor mb-4 w-full">
+                <div class="card-body p-4">
+                    <div class="info-card-title">LEXOR Core grammar</div>
+                    <hr class="border-t-1 my-4 w-full border-[var(--border-panel)]" />
+                    <p class="info-card-text mb-2">
+                        LEXOR focuses on readable, beginner-friendly constructs with a fixed program layout.
+                    </p>
+                    <ul class="info-card-text mb-2 pl-4 list-disc">
+                        <li>Variable declarations come immediately after <code>START SCRIPT</code></li>
+                        <li><code>DECLARE INT x, y, z = 5</code>, <code>DECLARE CHAR a_1 = 'n'</code>, <code>DECLARE BOOL t = "TRUE"</code></li>
+                        <li>Each line contains exactly one statement; reserved words are in <span style="color: var(--accent)">ALL CAPS</span></li>
+                        <li>Comments start with <code>%%</code> and can appear anywhere</li>
+                        <li><code>$</code> creates a new line, <code>&amp;</code> concatenates, <code>[]</code> is used as an escape code</li>
+                    </ul>
+                    <p class="info-card-text mb-0">
+                        Supported data types: <strong>INT</strong>, <strong>CHAR</strong>, <strong>BOOL</strong>, and <strong>FLOAT</strong>. Control flow includes
+                        <code>IF / ELSE IF / ELSE</code> blocks and loop structures such as <code>FOR</code> and <code>REPEAT WHEN</code>.
+                    </p>
+                </div>
+            </div>
+            <div class="docs-row-two-col">
                 <div class="card-lexor">
                     <div class="card-body p-4">
                         <div class="info-card-title">Quick start</div>
@@ -427,28 +507,8 @@
                         <ul class="info-card-text mb-0 pl-4 list-disc">
                             <li>All programs begin with <code>SCRIPT AREA</code></li>
                             <li>Code lives between <code>START SCRIPT</code> and <code>END SCRIPT</code></li>
-                            <li>Run with the green button to see output below</li>
+                            <li>Run with the green button to see output beside the editor</li>
                         </ul>
-                    </div>
-                </div>
-                <div id="grammar" class="card-lexor">
-                    <div class="card-body p-4">
-                        <div class="info-card-title">LEXOR Core grammar</div>
-                        <hr class="border-t-1 my-4 w-full border-[var(--border-panel)]" />
-                        <p class="info-card-text mb-2">
-                            LEXOR focuses on readable, beginner-friendly constructs with a fixed program layout.
-                        </p>
-                        <ul class="info-card-text mb-2 pl-4 list-disc">
-                            <li>Variable declarations come immediately after <code>START SCRIPT</code></li>
-                            <li><code>DECLARE INT x, y, z = 5</code>, <code>DECLARE CHAR a_1 = 'n'</code>, <code>DECLARE BOOL t = "TRUE"</code></li>
-                            <li>Each line contains exactly one statement; reserved words are in <span style="color: var(--accent)">ALL CAPS</span></li>
-                            <li>Comments start with <code>%%</code> and can appear anywhere</li>
-                            <li><code>$</code> creates a new line, <code>&amp;</code> concatenates, <code>[]</code> is used as an escape code</li>
-                        </ul>
-                        <p class="info-card-text mb-0">
-                            Supported data types: <strong>INT</strong>, <strong>CHAR</strong>, <strong>BOOL</strong>, and <strong>FLOAT</strong>. Control flow includes
-                            <code>IF / ELSE IF / ELSE</code> blocks and loop structures such as <code>FOR</code> and <code>REPEAT WHEN</code>.
-                        </p>
                     </div>
                 </div>
                 <div class="card-lexor">
