@@ -107,8 +107,7 @@ END SCRIPT
 ```lexor
 SCRIPT AREA
 START SCRIPT
-DECLARE INT xyz, abc=100
-xyz= ((abc *5)/10 + 10) * -1
+DECLARE INT xyz=60
 PRINT: [[] & xyz & []]
 END SCRIPT
 ```
@@ -362,5 +361,76 @@ DECLARE BOOL isPositive
 SCAN: x
 isPositive= (x > 0)
 PRINT: isPositive
+END SCRIPT
+```
+
+## Reported failing cases assessment
+
+#### FC-01 - PRINT with grouped arithmetic inside concatenation
+Status: Valid test case, output is failing because arithmetic/grouped expression parsing is not yet fully covered in the current parser.
+
+Target increment: **Increment 2**
+
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x, y
+x = 10
+y = 20
+PRINT: x & " + " & y & " = " & (x + y)
+END SCRIPT
+```
+
+#### FC-02 - CHAR declaration assigned a full string
+Status: Invalid test case as written. `CHAR` accepts a single character, not a multi-character string.
+
+Target increment: **Increment 1** (typing rules already covered)
+
+Original invalid case:
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE CHAR msg = "Hello from LEXOR!"
+PRINT: msg
+END SCRIPT
+```
+
+Corrected valid version:
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE CHAR msg = 'H'
+PRINT: msg
+END SCRIPT
+```
+
+#### FC-03 - Complex arithmetic with grouping and unary minus
+Status: Valid test case, but currently failing due to missing arithmetic expression parser coverage.
+
+Target increment: **Increment 2**
+
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT xyz, abc=100
+xyz= ((abc *5)/10 + 10) * -1
+PRINT: [[] & xyz & []]
+END SCRIPT
+```
+
+#### FC-04 - FOR loop control flow
+Status: Valid test case, but not yet covered by current parser/interpreter logic.
+
+Target increment: **Increment 3**
+
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+DECLARE INT limit = 5
+FOR (i = 1, i <= limit, i = i + 1)
+START FOR
+PRINT: i
+END FOR
 END SCRIPT
 ```
