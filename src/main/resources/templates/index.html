@@ -75,6 +75,7 @@
             background-color: rgba(22, 27, 34, 1);
         }
         .editor-output-split {
+            --editor-pane-width: 50%;
             display: flex;
             align-items: stretch;
             min-height: 380px;
@@ -84,18 +85,39 @@
             background: var(--bg-editor);
         }
         .editor-pane {
-            flex: 1 1 50%;
-            min-width: 0;
+            flex: 0 0 var(--editor-pane-width);
+            min-width: 120px;
             display: flex;
             flex-direction: column;
         }
+        .editor-output-resizer {
+            flex: 0 0 6px;
+            width: 6px;
+            cursor: col-resize;
+            background: var(--border-panel);
+            position: relative;
+            user-select: none;
+            touch-action: none;
+            z-index: 2;
+        }
+        .editor-output-resizer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -4px;
+            right: -4px;
+        }
+        .editor-output-resizer:hover,
+        .editor-output-resizer.is-dragging {
+            background: var(--accent);
+        }
         .output-pane {
-            flex: 1 1 50%;
+            flex: 1 1 auto;
             min-width: 0;
             display: flex;
             flex-direction: column;
             background: var(--bg-console);
-            border-left: 1px solid var(--border-panel);
         }
         .editor-wrapper {
             flex: 1;
@@ -369,8 +391,15 @@
                 flex-direction: column;
                 min-height: 0;
             }
+            .editor-output-split .editor-pane {
+                flex: 1 1 auto !important;
+                max-width: none !important;
+                min-height: 260px;
+            }
+            .editor-output-resizer {
+                display: none;
+            }
             .output-pane {
-                border-left: none;
                 border-top: 1px solid var(--border-panel);
                 min-height: 220px;
             }
@@ -460,12 +489,20 @@
                         </button>
                     </div>
                 </div>
-                <div class="editor-output-split mt-2">
+                <div id="editor-output-split" class="editor-output-split mt-2">
                     <div class="editor-pane">
                         <div class="editor-wrapper">
                             <div id="lexor-editor"></div>
                         </div>
                     </div>
+                    <div
+                        id="editor-output-resizer"
+                        class="editor-output-resizer"
+                        role="separator"
+                        aria-orientation="vertical"
+                        aria-label="Resize editor and output"
+                        tabindex="0"
+                    ></div>
                     <div class="output-pane">
                         <div class="console-label">Output</div>
                         <div id="console" class="console-box" role="log" aria-live="polite"></div>
@@ -676,6 +713,95 @@
             }
         });
 
+        const EDITOR_SPLIT_STORAGE_KEY = 'clervinator.editorSplitPct';
+
+        function initEditorOutputResizer() {
+            const split = document.getElementById('editor-output-split');
+            const resizer = document.getElementById('editor-output-resizer');
+            if (!split || !resizer) return;
+
+            let currentPct = 50;
+            const saved = localStorage.getItem(EDITOR_SPLIT_STORAGE_KEY);
+            if (saved) {
+                const p = parseFloat(saved, 10);
+                if (!isNaN(p)) currentPct = Math.min(85, Math.max(15, p));
+            }
+            split.style.setProperty('--editor-pane-width', currentPct + '%');
+
+            function applySplit(pct, persist) {
+                currentPct = Math.min(85, Math.max(15, pct));
+                split.style.setProperty('--editor-pane-width', currentPct + '%');
+                if (persist !== false) {
+                    localStorage.setItem(EDITOR_SPLIT_STORAGE_KEY, String(Math.round(currentPct * 10) / 10));
+                }
+                if (editor) {
+                    requestAnimationFrame(function () {
+                        editor.layout();
+                    });
+                }
+            }
+
+            let dragging = false;
+
+            function isNarrowLayout() {
+                return window.matchMedia('(max-width: 767.98px)').matches;
+            }
+
+            resizer.addEventListener('mousedown', function (e) {
+                if (isNarrowLayout()) return;
+                e.preventDefault();
+                dragging = true;
+                resizer.classList.add('is-dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (!dragging || isNarrowLayout()) return;
+                const rect = split.getBoundingClientRect();
+                const w = rect.width;
+                if (w <= 0) return;
+                const x = e.clientX - rect.left;
+                const pct = (x / w) * 100;
+                applySplit(pct, true);
+            });
+
+            document.addEventListener('mouseup', function () {
+                if (!dragging) return;
+                dragging = false;
+                resizer.classList.remove('is-dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                if (editor) {
+                    requestAnimationFrame(function () {
+                        editor.layout();
+                    });
+                }
+            });
+
+            resizer.addEventListener('dblclick', function () {
+                if (isNarrowLayout()) return;
+                applySplit(50, true);
+            });
+
+            resizer.addEventListener('keydown', function (e) {
+                if (isNarrowLayout()) return;
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    applySplit(currentPct - 2, true);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    applySplit(currentPct + 2, true);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    applySplit(15, true);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    applySplit(85, true);
+                }
+            });
+        }
+
         require.config({
             paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }
         });
@@ -691,6 +817,7 @@
                 padding: { top: 12 }
             });
             setFilename('untitled.lexor');
+            initEditorOutputResizer();
         });
     </script>
 </body>
