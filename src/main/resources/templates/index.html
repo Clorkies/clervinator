@@ -390,6 +390,164 @@
             color: var(--text-muted);
             margin-bottom: 0.25rem;
         }
+        .docs-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .docs-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-panel);
+            border-radius: 0.5rem;
+            padding: 0.42rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-main);
+            background-color: rgba(24, 31, 38, 0.9);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.18s ease;
+        }
+        .docs-link-btn:hover {
+            color: var(--text-main);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .checkpoint-section {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .checkpoint-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .checkpoint-title {
+            margin: 0;
+            font-size: clamp(1.15rem, 2vw, 1.45rem);
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.02em;
+        }
+        .checkpoint-subtitle {
+            margin: 0.35rem 0 0;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.45;
+            max-width: 55rem;
+        }
+        .checkpoint-status-chip {
+            border-radius: 999px;
+            border: 1px solid rgba(54, 211, 153, 0.45);
+            background: rgba(54, 211, 153, 0.12);
+            color: #9df4cc;
+            padding: 0.25rem 0.65rem;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .checkpoint-flow {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.8rem;
+            align-items: stretch;
+        }
+        .inc-card {
+            position: relative;
+            border: 1px solid var(--border-panel);
+            border-radius: 1rem;
+            background: linear-gradient(160deg, rgba(19, 26, 35, 0.96), rgba(13, 18, 26, 0.92));
+            box-shadow: 0 16px 30px rgba(4, 9, 16, 0.35);
+            padding: 1rem 0.95rem;
+        }
+        .inc-card.inc-done {
+            border-color: rgba(54, 211, 153, 0.7);
+            box-shadow: 0 0 0 1px rgba(54, 211, 153, 0.18), 0 18px 32px rgba(10, 20, 15, 0.5);
+        }
+        .inc-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+        }
+        .inc-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.03em;
+            margin: 0;
+        }
+        .inc-date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin: 0 0 0.8rem;
+        }
+        .inc-badge {
+            border-radius: 999px;
+            padding: 0.18rem 0.52rem;
+            font-size: 0.64rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            border: 1px solid var(--border-panel);
+            color: var(--text-muted);
+            background: rgba(24, 31, 38, 0.88);
+            white-space: nowrap;
+        }
+        .inc-badge.done {
+            border-color: rgba(54, 211, 153, 0.6);
+            color: #9df4cc;
+            background: rgba(54, 211, 153, 0.14);
+        }
+        .inc-badge.not-started {
+            border-color: rgba(255, 255, 255, 0.45);
+            color: #ffffff;
+            background: rgba(199, 199, 199, 0.12);
+        }
+        .inc-badge.pending {
+            border-color: rgba(88, 166, 255, 0.45);
+            color: #a9ceff;
+            background: rgba(88, 166, 255, 0.12);
+        }
+        .inc-list {
+            margin: 0;
+            padding-left: 1rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.45;
+            list-style-type: disc;
+        }
+        .inc-arrow {
+            position: absolute;
+            top: 50%;
+            right: -0.92rem;
+            width: 1.85rem;
+            height: 1.85rem;
+            border-radius: 999px;
+            border: 1px solid rgba(88, 166, 255, 0.4);
+            background: rgba(13, 18, 26, 0.95);
+            color: #b8d2ff;
+            font-size: 1.08rem;
+            font-weight: 700;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-50%);
+            z-index: 2;
+            box-shadow: 0 8px 18px rgba(3, 8, 16, 0.45);
+        }
         .info-card-text {
             font-size: 0.9rem;
             color: var(--text-muted);
@@ -532,6 +690,15 @@
             }
             .docs-row-two-col {
                 grid-template-columns: 1fr;
+            }
+            .checkpoint-flow {
+                grid-template-columns: 1fr;
+            }
+            .inc-arrow {
+                display: none;
+            }
+            .docs-link-btn {
+                width: 100%;
             }
             .editor-output-split {
                 flex-direction: column;
@@ -728,6 +895,75 @@
                         </ul>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section id="increment-checkpoint" class="checkpoint-section">
+            <div class="checkpoint-header">
+                <div>
+                    <h2 class="checkpoint-title">Increment Checkpoint</h2>
+                    <p class="checkpoint-subtitle">
+                        Final project checkpoint for <strong>CS322 - Programming Languages</strong>.
+                        Current status reflects implemented language milestones in this repository.
+                    </p>
+                </div>
+                <span class="checkpoint-status-chip">Progress: Increment 1 Completed</span>
+            </div>
+
+            <div class="checkpoint-flow">
+                <article class="inc-card inc-done">
+                    <div class="inc-meta">
+                        <h3 class="inc-title">Increment 1</h3>
+                        <span class="inc-badge done">Completed</span>
+                    </div>
+                    <p class="inc-date">April 15, 2026</p>
+                    <ul class="inc-list">
+                        <li>Recognize core LEXOR program structure</li>
+                        <li>Recognize comments and reserved words</li>
+                        <li>Support concatenation and <code>PRINT</code></li>
+                        <li>Support declaration and variable assignment</li>
+                    </ul>
+                    <span class="inc-arrow" aria-hidden="true">&rarr;</span>
+                </article>
+
+                <article class="inc-card">
+                    <div class="inc-meta">
+                        <h3 class="inc-title">Increment 2</h3>
+                        <span class="inc-badge pending">In Progress</span>
+                    </div>
+                    <p class="inc-date">April 22, 2026</p>
+                    <ul class="inc-list">
+                        <li>Unary operator support</li>
+                        <li><code>SCAN</code> input statement support</li>
+                        <li>Arithmetic and logical operations</li>
+                    </ul>
+                    <span class="inc-arrow" aria-hidden="true">&rarr;</span>
+                </article>
+
+                <article class="inc-card">
+                    <div class="inc-meta">
+                        <h3 class="inc-title">Increment 3</h3>
+                        <span class="inc-badge not-started">Not Started</span>
+                    </div>
+                    <p class="inc-date">April 29, 2026</p>
+                    <ul class="inc-list">
+                        <li>Execute <code>IF</code> and <code>IF ELSE</code></li>
+                        <li>Support nested control structures</li>
+                    </ul>
+                    <span class="inc-arrow" aria-hidden="true">&rarr;</span>
+                </article>
+
+                <article class="inc-card">
+                    <div class="inc-meta">
+                        <h3 class="inc-title">Increment 4</h3>
+                        <span class="inc-badge not-started">Not Started</span>
+                    </div>
+                    <p class="inc-date">May 6, 2026</p>
+                    <ul class="inc-list">
+                        <li>Execute <code>FOR</code> loops</li>
+                        <li>Support nested loop execution</li>
+                    </ul>
+                </article>
             </div>
         </section>
     </main>
