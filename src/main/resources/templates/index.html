@@ -276,6 +276,52 @@
             padding: 0.75rem 0 1rem;
             margin-bottom: 0.5rem;
         }
+        .sample-controls-shell {
+            border: 1px solid var(--border-panel);
+            border-radius: 14px;
+            background: rgba(22, 27, 34, 0.88);
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+        }
+        .sample-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            min-width: 240px;
+        }
+        .sample-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .increment-btn {
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background-color: rgba(13, 17, 23, 0.55);
+            color: var(--text-muted);
+            font-size: 0.77rem;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+            padding: 0.42rem 0.82rem;
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+        }
+        .increment-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background-color: rgba(13, 17, 23, 0.92);
+        }
+        .increment-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.55);
+            border-color: var(--accent);
+        }
         .layout-max {
             max-width: 1400px;
             margin-left: auto;
@@ -472,6 +518,17 @@
             .main-content {
                 padding-inline: 1.1rem;
             }
+            .sample-controls-shell {
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+            .sample-controls-left,
+            .sample-controls-right {
+                width: 100%;
+            }
+            .sample-controls-right {
+                justify-content: flex-start;
+            }
             .docs-row-two-col {
                 grid-template-columns: 1fr;
             }
@@ -548,14 +605,22 @@
             <div class="flex items-center justify-between mb-2">
                 <label class="toolbar-label">Sample Programs</label>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                <select id="sample-programs" class="form-select-lexor text-sm" aria-label="Sample programs">
-                    <option value="" class="placeholder-option">Select a sample program…</option>
-                    <option value="hello">Hello World</option>
-                    <option value="vars">Variables</option>
-                    <option value="loop">Simple Loop</option>
-                    <option value="empty">Empty / Clear</option>
-                </select>
+            <div class="sample-controls-shell">
+                <div class="sample-controls-left">
+                    <select id="sample-programs" class="form-select-lexor text-sm" aria-label="Sample programs">
+                        <option value="" class="placeholder-option">Select a sample program…</option>
+                        <option value="hello">Hello World</option>
+                        <option value="vars">Variables</option>
+                        <option value="loop">Simple Loop</option>
+                        <option value="empty">Empty / Clear</option>
+                    </select>
+                    <div class="sample-controls-right">
+                        <button type="button" class="increment-btn" data-increment="1">Increment 1</button>
+                        <button type="button" class="increment-btn" data-increment="2">Increment 2</button>
+                        <button type="button" class="increment-btn" data-increment="3">Increment 3</button>
+                        <button type="button" class="increment-btn" data-increment="4">Increment 4</button>
+                    </div>
+                </div>
                 <div class="ml-auto flex items-center gap-2 flex-wrap">
                     <button type="button" id="import-btn" class="btn-ghost">
                         <i class="bi bi-upload"></i>
@@ -723,8 +788,10 @@
         const consoleEl = document.getElementById('console');
         const fileNameEl = document.getElementById('file-name');
         const fileRenameBtn = document.getElementById('file-rename-btn');
+        const incrementButtons = Array.from(document.querySelectorAll('[data-increment]'));
         let editor = null;
         let currentFilename = 'untitled.lexor';
+        let testCasesMarkdownCache = null;
 
         function appendToConsole(text, isError) {
             const line = document.createElement('div');
@@ -743,6 +810,13 @@
             if (fileNameEl) {
                 fileNameEl.textContent = currentFilename;
             }
+        }
+
+        function loadProgramContent(filename, content) {
+            if (editor) {
+                editor.setValue(content || '');
+            }
+            setFilename(filename || 'untitled.lexor');
         }
 
         function normalizeFilename(name) {
@@ -771,13 +845,120 @@
             URL.revokeObjectURL(url);
         }
 
+        async function getTestCasesMarkdown() {
+            if (typeof testCasesMarkdownCache === 'string') {
+                return testCasesMarkdownCache;
+            }
+
+            const response = await fetch('/LEXOR_Test_Cases.md', { cache: 'no-cache' });
+            if (!response.ok) {
+                throw new Error('Unable to load LEXOR test cases markdown.');
+            }
+
+            testCasesMarkdownCache = await response.text();
+            return testCasesMarkdownCache;
+        }
+
+        function getIncrementSection(markdown, incrementNumber) {
+            const lines = (markdown || '').split(/\r?\n/);
+            const startPattern = new RegExp('^##\\s+Increment\\s+' + incrementNumber + '\\b', 'i');
+            const endPattern = /^##\s+Increment\s+\d+\b/i;
+            const startIdx = lines.findIndex((line) => startPattern.test(line.trim()));
+            if (startIdx < 0) {
+                return '';
+            }
+
+            let endIdx = lines.length;
+            for (let i = startIdx + 1; i < lines.length; i++) {
+                if (endPattern.test(lines[i].trim())) {
+                    endIdx = i;
+                    break;
+                }
+            }
+            return lines.slice(startIdx, endIdx).join('\n');
+        }
+
+        function buildIncrementBundle(markdown, incrementNumber) {
+            const section = getIncrementSection(markdown, incrementNumber);
+            if (!section.trim()) {
+                return '';
+            }
+
+            const lines = section.split(/\r?\n/);
+            const parts = [];
+            let currentCaseLabel = null;
+            let inFence = false;
+            let codeLines = [];
+            let detectedAnyCode = false;
+
+            for (const rawLine of lines) {
+                const line = rawLine.trim();
+                const tcMatch = line.match(/^####\s*(TC-\d+)\s*[-·]?\s*(.*)$/i);
+                if (tcMatch) {
+                    const suffix = (tcMatch[2] || '').trim();
+                    currentCaseLabel = suffix ? (tcMatch[1].toUpperCase() + ' - ' + suffix) : tcMatch[1].toUpperCase();
+                    continue;
+                }
+
+                if (line.startsWith('```')) {
+                    if (!inFence) {
+                        inFence = true;
+                        codeLines = [];
+                    } else {
+                        inFence = false;
+                        const code = codeLines.join('\n').trim();
+                        if (code) {
+                            detectedAnyCode = true;
+                            const label = currentCaseLabel || ('INCREMENT ' + incrementNumber + ' CASE');
+                            parts.push('%% ---------- ' + label + ' ----------\n' + code);
+                        }
+                    }
+                    continue;
+                }
+
+                if (inFence) {
+                    codeLines.push(rawLine);
+                }
+            }
+
+            if (!detectedAnyCode) {
+                return '';
+            }
+
+            return parts.join('\n\n') + '\n';
+        }
+
         sampleSelect.addEventListener('change', function () {
             const key = this.value;
             if (!key) return;
             const sample = SAMPLES[key];
             if (!sample) return;
-            if (editor) editor.setValue(sample.code || '');
-            setFilename(sample.filename || 'untitled.lexor');
+            loadProgramContent(sample.filename || 'untitled.lexor', sample.code || '');
+        });
+
+        incrementButtons.forEach((button) => {
+            button.addEventListener('click', async function () {
+                const increment = this.getAttribute('data-increment');
+                if (!increment) return;
+
+                if (increment === '3' || increment === '4') {
+                    const placeholder = '%% Test cases for increment ' + increment + ' is yet to be implemented...';
+                    loadProgramContent('increment_' + increment + '_test_cases.lexor', placeholder + '\n');
+                    return;
+                }
+
+                try {
+                    const markdown = await getTestCasesMarkdown();
+                    const bundle = buildIncrementBundle(markdown, Number(increment));
+                    if (!bundle) {
+                        throw new Error('No test cases found for increment ' + increment + '.');
+                    }
+                    loadProgramContent('increment_' + increment + '_test_cases.lexor', bundle);
+                } catch (err) {
+                    clearConsole();
+                    appendToConsole('Failed to load increment ' + increment + ' test cases: ' + err.message, true);
+                }
+            });
         });
 
         saveBtn.addEventListener('click', function () {
