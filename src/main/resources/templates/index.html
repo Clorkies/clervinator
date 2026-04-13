@@ -612,7 +612,7 @@
                         <option value="" class="placeholder-option">Select a sample program…</option>
                         <option value="hello">Hello World</option>
                         <option value="vars">Variables</option>
-                        <option value="loop">Simple Loop</option>
+                        <option value="loop">Chained Assignment</option>
                         <option value="empty">Empty / Clear</option>
                     </select>
                     <div class="sample-controls-right">
@@ -765,15 +765,15 @@
         const SAMPLES = {
             hello: {
                 filename: 'hello_world.lexor',
-                code: 'SCRIPT AREA\nSTART SCRIPT\nDECLARE CHAR msg = "Hello from LEXOR!"\nPRINT: msg\nEND SCRIPT\n'
+                code: 'SCRIPT AREA\nSTART SCRIPT\nPRINT: "Hello from LEXOR!"\nEND SCRIPT\n'
             },
             vars: {
                 filename: 'variables.lexor',
-                code: 'SCRIPT AREA\nSTART SCRIPT\nDECLARE INT x, y\nx = 10\ny = 20\nPRINT: x & " + " & y & " = " & (x + y)\nEND SCRIPT\n'
+                code: 'SCRIPT AREA\nSTART SCRIPT\nDECLARE INT x, y\nx = 10\ny = 20\nPRINT: x & " " & y\nEND SCRIPT\n'
             },
             loop: {
-                filename: 'simple_loop.lexor',
-                code: 'SCRIPT AREA\nSTART SCRIPT\nDECLARE INT i\nDECLARE INT limit = 5\nFOR (i = 1, i <= limit, i = i + 1)\nSTART FOR\nPRINT: i\nEND FOR\nEND SCRIPT\n'
+                filename: 'chained_assignment.lexor',
+                code: 'SCRIPT AREA\nSTART SCRIPT\nDECLARE INT x, y\nx=y=10\nPRINT: x & $ & y\nEND SCRIPT\n'
             },
             empty: {
                 filename: 'untitled.lexor',
@@ -942,8 +942,8 @@
                 const increment = this.getAttribute('data-increment');
                 if (!increment) return;
 
-                if (increment === '3' || increment === '4') {
-                    const placeholder = '%% Test cases for increment ' + increment + ' is yet to be implemented...';
+                if (increment !== '1') {
+                    const placeholder = '%% Iincrement ' + increment + ' is yet to be implemented...';
                     loadProgramContent('increment_' + increment + '_test_cases.lexor', placeholder + '\n');
                     return;
                 }
