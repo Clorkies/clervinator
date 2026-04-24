@@ -44,6 +44,14 @@ public class Environment {
         return variables.get(name).value();
     }
 
+    // Returns the declared type of a variable
+    public TokenType getType(String name) {
+        if (!variables.containsKey(name)) {
+            throw new ParserException("Variable '" + name + "' has not been declared.");
+        }
+        return variables.get(name).type();
+    }
+
     private Object getDefaultValue(TokenType type) {
         return switch (type) {
             case INT_TYPE -> 0;
