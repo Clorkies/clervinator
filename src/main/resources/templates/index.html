@@ -165,6 +165,34 @@
             color: var(--error);
             font-weight: 500;
         }
+        .console-box .loading-line {
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .console-spinner {
+            width: 0.9rem;
+            height: 0.9rem;
+            border-radius: 999px;
+            border: 2px solid rgba(88, 166, 255, 0.2);
+            border-top-color: var(--accent);
+            animation: console-spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+        .console-loading-dots {
+            display: inline-block;
+            min-width: 1.8rem;
+            text-align: left;
+        }
+        @keyframes console-spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
         .file-meta {
             display: flex;
             align-items: center;
@@ -473,6 +501,10 @@
         .inc-card.inc-done {
             border-color: rgba(54, 211, 153, 0.7);
             box-shadow: 0 0 0 1px rgba(54, 211, 153, 0.18), 0 18px 32px rgba(10, 20, 15, 0.5);
+        }
+        .inc-card.inc-current {
+            border-color: rgba(88, 166, 255, 0.75);
+            box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.18), 0 18px 32px rgba(3, 8, 16, 0.55);
         }
         .inc-meta {
             display: flex;
@@ -931,10 +963,10 @@
                     <span class="inc-arrow" aria-hidden="true">&rarr;</span>
                 </article>
 
-                <article class="inc-card">
+                <article class="inc-card inc-done">
                     <div class="inc-meta">
                         <h3 class="inc-title">Increment 2</h3>
-                        <span class="inc-badge pending">In Progress</span>
+                        <span class="inc-badge done">Completed</span>
                     </div>
                     <p class="inc-date">April 22, 2026</p>
                     <ul class="inc-list">
@@ -945,10 +977,10 @@
                     <span class="inc-arrow" aria-hidden="true">&rarr;</span>
                 </article>
 
-                <article class="inc-card">
+                <article class="inc-card inc-current">
                     <div class="inc-meta">
                         <h3 class="inc-title">Increment 3</h3>
-                        <span class="inc-badge not-started">Not Started</span>
+                        <span class="inc-badge pending">In Progress</span>
                     </div>
                     <p class="inc-date">April 29, 2026</p>
                     <ul class="inc-list">
@@ -1179,6 +1211,7 @@ END SCRIPT
         let editor = null;
         let currentFilename = 'untitled.lexor';
         let testCasesMarkdownCache = null;
+        let consoleLoadingTimer = null;
 
         function appendToConsole(text, isError) {
             const line = document.createElement('div');
@@ -1188,8 +1221,45 @@ END SCRIPT
             consoleEl.scrollTop = consoleEl.scrollHeight;
         }
 
+        function stopConsoleLoadingState() {
+            if (consoleLoadingTimer) {
+                window.clearInterval(consoleLoadingTimer);
+                consoleLoadingTimer = null;
+            }
+        }
+
         function clearConsole() {
+            stopConsoleLoadingState();
             consoleEl.innerHTML = '';
+        }
+
+        function showConsoleLoadingState(message) {
+            clearConsole();
+
+            const line = document.createElement('div');
+            line.className = 'loading-line';
+
+            const spinner = document.createElement('span');
+            spinner.className = 'console-spinner';
+            spinner.setAttribute('aria-hidden', 'true');
+
+            const label = document.createElement('span');
+            label.textContent = message || 'Fetching result';
+
+            const dots = document.createElement('span');
+            dots.className = 'console-loading-dots';
+            dots.textContent = '.';
+
+            line.appendChild(spinner);
+            line.appendChild(label);
+            line.appendChild(dots);
+            consoleEl.appendChild(line);
+
+            let dotCount = 1;
+            consoleLoadingTimer = window.setInterval(function () {
+                dotCount = (dotCount % 3) + 1;
+                dots.textContent = '.'.repeat(dotCount);
+            }, 350);
         }
 
         function setFilename(name) {
@@ -1383,7 +1453,7 @@ END SCRIPT
 
         runBtn.addEventListener('click', async function () {
             const code = editor ? editor.getValue() : '';
-            clearConsole();
+            showConsoleLoadingState('Running program and fetching output');
             runBtn.disabled = true;
             runBtn.querySelector('i').className = 'bi bi-hourglass-split me-1';
 
@@ -1394,6 +1464,7 @@ END SCRIPT
                     body: code
                 });
                 const data = await res.json();
+                clearConsole();
 
                 if (data.error) {
                     appendToConsole(data.error, true);
