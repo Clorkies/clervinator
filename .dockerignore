@@ -1,0 +1,7 @@
+.git
+.gitignore
+.idea
+.vscode
+target
+test_output.txt
+docs
