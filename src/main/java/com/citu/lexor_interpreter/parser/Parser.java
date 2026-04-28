@@ -7,9 +7,12 @@ import com.citu.lexor_interpreter.parser.ast.AssignNode;
 import com.citu.lexor_interpreter.parser.ast.DeclareNode;
 import com.citu.lexor_interpreter.parser.ast.ExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.PrintNode;
+import com.citu.lexor_interpreter.parser.ast.ScanNode;
 import com.citu.lexor_interpreter.parser.ast.StatementNode;
+import com.citu.lexor_interpreter.parser.ast.expression.BinaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.LiteralNode;
 import com.citu.lexor_interpreter.parser.ast.expression.NewlineNode;
+import com.citu.lexor_interpreter.parser.ast.expression.UnaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.VariableNode;
 
 import java.util.ArrayList;
@@ -113,7 +116,74 @@ public class Parser {
         throw error("expected expression");
     }
 
+    // Expression precedence (lowest to highest)
     private ExpressionNode parseExpression() {
+        return parseOr();
+    }
+
+    // OR
+    private ExpressionNode parseOr() {
+        ExpressionNode left = parseAnd();
+        while (match(TokenType.OR)) {
+            TokenType op = previous().type();
+            ExpressionNode right = parseAnd();
+            left = new BinaryExpressionNode(left, op, right);
+        }
+        return left;
+    }
+
+    // AND
+    private ExpressionNode parseAnd() {
+        ExpressionNode left = parseComparison();
+        while (match(TokenType.AND)) {
+            TokenType op = previous().type();
+            ExpressionNode right = parseComparison();
+            left = new BinaryExpressionNode(left, op, right);
+        }
+        return left;
+    }
+
+    // Comparison: ==, <>, >, >=, <, <=
+    private ExpressionNode parseComparison() {
+        ExpressionNode left = parseAddition();
+        while (match(TokenType.EQUAL, TokenType.NOT_EQUAL, TokenType.GREATER_THAN, TokenType.GREATER_EQUAL, TokenType.LESS_THAN, TokenType.LESS_EQUAL)) {
+            TokenType op = previous().type();
+            ExpressionNode right = parseAddition();
+            left = new BinaryExpressionNode(left, op, right);
+        }
+        return left;
+    }
+
+    // Addition and subtraction
+    private ExpressionNode parseAddition() {
+        ExpressionNode left = parseMultiplication();
+        while (match(TokenType.PLUS, TokenType.MINUS)) {
+            TokenType op = previous().type();
+            ExpressionNode right = parseMultiplication();
+            left = new BinaryExpressionNode(left, op, right);
+        }
+        return left;
+    }
+
+    // Multiplication, division, modulo
+    private ExpressionNode parseMultiplication() {
+        ExpressionNode left = parseUnary();
+        while (match(TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO)) {
+            TokenType op = previous().type();
+            ExpressionNode right = parseUnary();
+            left = new BinaryExpressionNode(left, op, right);
+        }
+        return left;
+    }
+
+    // Unary: NOT, -
+    private ExpressionNode parseUnary() {
+        if (match(TokenType.NOT)) {
+            return new UnaryExpressionNode(TokenType.NOT, parseUnary());
+        }
+        if (match(TokenType.MINUS)) {
+            return new UnaryExpressionNode(TokenType.MINUS, parseUnary());
+        }
         return parsePrimary();
     }
 
@@ -161,6 +231,14 @@ public class Parser {
         return parseExpression();
     }
 
+    // SCAN: variableName
+    private ScanNode parseScanStatement() {
+        consume(TokenType.SCAN, "expected SCAN");
+        consume(TokenType.COLON, "expected ':' after SCAN");
+        Token name = consume(TokenType.IDENTIFIER, "expected variable name after SCAN:");
+        return new ScanNode(name.lexeme());
+    }
+
     private List<StatementNode> parseAssignmentStatement() {
         List<String> names = new ArrayList<>();
         names.add(consume(TokenType.IDENTIFIER, "expected variable name on assignment").lexeme());
@@ -192,6 +270,10 @@ public class Parser {
 
         if (check(TokenType.PRINT)) {
             return List.of(parsePrintStatement());
+        }
+
+        if (check(TokenType.SCAN)) {
+            return List.of(parseScanStatement());
         }
 
         if (check(TokenType.IDENTIFIER) && peekNext().type() == TokenType.ASSIGN) {
