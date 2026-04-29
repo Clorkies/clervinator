@@ -268,4 +268,18 @@ class Increment2Test {
             """;
         assertEquals("27", run(code));
     }
+
+    @Test
+    void testEscapeCodes_TC11_printsBracketsAroundValue() {
+        // TC-11: `PRINT: [[] & xyz & []]` should produce `[<value>]`
+        String code = """
+            SCRIPT AREA
+            START SCRIPT
+            DECLARE INT xyz=60
+            PRINT: [[] & xyz & []]
+            END SCRIPT
+            """;
+
+        assertEquals("[60]", run(code));
+    }
 }
