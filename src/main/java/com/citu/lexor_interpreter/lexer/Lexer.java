@@ -194,9 +194,6 @@ public class Lexer {
     }
 
     private void escape() {
-        // Escape sequences start with '[' and normally end at the next ']'.
-        // To include a literal ']' inside the escape, write ']]' (double-close):
-        // e.g. `[]]` => content `]`, `[#]` => content `#`, `[[]` => content `[`.
         StringBuilder content = new StringBuilder();
 
         while (!isAtEnd()) {
@@ -207,15 +204,13 @@ public class Lexer {
             }
 
             if (next == ']') {
-                // Treat `]]` as an escaped ']' character inside the escape.
                 if (peekNext() == ']') {
-                    advance(); // consume first ']'
+                    advance(); 
                     content.append(']');
                     continue;
                 }
 
-                // Single ']' ends the escape.
-                advance(); // consume closing ']'
+                advance(); 
                 addToken(TokenType.STRING_LITERAL, content.toString());
                 return;
             }
