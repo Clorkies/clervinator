@@ -151,6 +151,41 @@ class LexerTest {
         assertTrue(ex.getMessage().contains("Unterminated escape sequence"));
     }
 
+    @Test
+    void lex_escape_sequence_allowsEscapedRightBracket() {
+        // `[]]` should tokenize as an escape sequence whose content is `]`,
+        // so there must not be a stray ESCAPE_CLOSE token afterwards.
+        String source = "PRINT: []]";
+
+        List<Token> tokens = new Lexer().lex(source);
+
+        assertTokenTypes(tokens,
+            TokenType.PRINT,
+            TokenType.COLON,
+            TokenType.STRING_LITERAL,
+            TokenType.EOF
+        );
+
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.STRING_LITERAL && "]".equals(t.literalValue())));
+    }
+
+    @Test
+    void lex_escape_sequence_allowsLeftBracketContent() {
+        // `[[]` => escape content `[`
+        String source = "PRINT: [[]";
+
+        List<Token> tokens = new Lexer().lex(source);
+
+        assertTokenTypes(tokens,
+            TokenType.PRINT,
+            TokenType.COLON,
+            TokenType.STRING_LITERAL,
+            TokenType.EOF
+        );
+
+        assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.STRING_LITERAL && "[".equals(t.literalValue())));
+    }
+
     private static void assertTokenTypes(List<Token> tokens, TokenType... expected) {
         assertEquals(expected.length, tokens.size(), "Token count mismatch");
         for (int i = 0; i < expected.length; i++) {

@@ -194,21 +194,31 @@ public class Lexer {
     }
 
     private void escape() {
-        while (!isAtEnd() && peek() != ']') {
-            if (peek() == '\n') {
+        StringBuilder content = new StringBuilder();
+
+        while (!isAtEnd()) {
+            char next = peek();
+
+            if (next == '\n') {
                 throw error("Unterminated escape sequence", currentLexeme());
             }
-            advance();
+
+            if (next == ']') {
+                if (peekNext() == ']') {
+                    advance(); 
+                    content.append(']');
+                    continue;
+                }
+
+                advance(); 
+                addToken(TokenType.STRING_LITERAL, content.toString());
+                return;
+            }
+
+            content.append(advance());
         }
 
-        if (isAtEnd()) {
-            throw error("Unterminated escape sequence", currentLexeme());
-        }
-
-        advance();
-        String full = currentLexeme();
-        String content = full.length() >= 2 ? full.substring(1, full.length() - 1) : "";
-        addToken(TokenType.STRING_LITERAL, content);
+        throw error("Unterminated escape sequence", currentLexeme());
     }
 
     private void identifierOrKeyword() {
