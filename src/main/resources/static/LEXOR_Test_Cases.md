@@ -26,6 +26,7 @@ START SCRIPT
 DECLARE INT age
 DECLARE CHAR grade
 DECLARE BOOL isPass
+PRINT: age & $ & grade & $ & isPass
 END SCRIPT
 ```
 
@@ -37,6 +38,7 @@ DECLARE INT score=100
 DECLARE CHAR letter='A'
 DECLARE BOOL flag="TRUE"
 DECLARE FLOAT pi=3.14
+PRINT: score & $ & letter & $ & flag & $ & pi
 END SCRIPT
 ```
 
@@ -44,8 +46,12 @@ END SCRIPT
 ```lexor
 SCRIPT AREA
 START SCRIPT
-DECLARE INT x, y, z=5
-DECLARE CHAR a='n', b
+DECLARE INT x
+DECLARE INT y
+DECLARE INT z=5
+DECLARE CHAR a='n'
+DECLARE CHAR b
+PRINT: x & $ & y & $ & z & $ & a & $ & b
 END SCRIPT
 ```
 
@@ -117,7 +123,9 @@ END SCRIPT
 %% this is a sample program in LEXOR
 SCRIPT AREA
 START SCRIPT
-DECLARE INT x, y, z=5
+DECLARE INT x
+DECLARE INT y
+DECLARE INT z=5
 DECLARE CHAR a_1='n'
 DECLARE BOOL t="TRUE"
 x=y=4

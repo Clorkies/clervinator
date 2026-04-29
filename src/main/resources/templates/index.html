@@ -351,6 +351,79 @@
             box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.55);
             border-color: var(--accent);
         }
+        .increment-btn.is-active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+        /* ---- TC Picker Strip ---- */
+        .tc-picker-wrap {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease, margin-top 0.28s ease;
+            margin-top: 0;
+        }
+        .tc-picker-wrap.open {
+            max-height: 72px;
+            opacity: 1;
+            margin-top: 0.6rem;
+        }
+        .tc-picker {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-panel) transparent;
+            padding: 0.35rem 0.1rem 0.45rem;
+        }
+        .tc-picker::-webkit-scrollbar {
+            height: 4px;
+        }
+        .tc-picker::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .tc-picker::-webkit-scrollbar-thumb {
+            background: var(--border-panel);
+            border-radius: 999px;
+        }
+        .tc-pill {
+            flex-shrink: 0;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background-color: rgba(13, 17, 23, 0.6);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            letter-spacing: 0.04em;
+            padding: 0.3rem 0.72rem;
+            cursor: pointer;
+            transition: color 0.13s ease, border-color 0.13s ease, background-color 0.13s ease, transform 0.12s ease;
+            white-space: nowrap;
+        }
+        .tc-pill:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background-color: rgba(88, 166, 255, 0.08);
+            transform: translateY(-1px);
+        }
+        .tc-pill.is-active {
+            color: #0d1117;
+            border-color: var(--accent);
+            background-color: var(--accent);
+            font-weight: 700;
+        }
+        .tc-picker-label {
+            flex-shrink: 0;
+            font-size: 0.67rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            padding-right: 0.2rem;
+            white-space: nowrap;
+        }
         .layout-max {
             max-width: 1400px;
             margin-left: auto;
@@ -816,10 +889,10 @@
                         <option value="empty">Empty / Clear</option>
                     </select>
                     <div class="sample-controls-right">
-                        <button type="button" class="increment-btn" data-increment="1">Increment 1</button>
-                        <button type="button" class="increment-btn" data-increment="2">Increment 2</button>
-                        <button type="button" class="increment-btn" data-increment="3">Increment 3</button>
-                        <button type="button" class="increment-btn" data-increment="4">Increment 4</button>
+                        <button type="button" class="increment-btn" data-increment="1" id="inc-btn-1">Increment 1</button>
+                        <button type="button" class="increment-btn" data-increment="2" id="inc-btn-2">Increment 2</button>
+                        <button type="button" class="increment-btn" data-increment="3" id="inc-btn-3">Increment 3</button>
+                        <button type="button" class="increment-btn" data-increment="4" id="inc-btn-4">Increment 4</button>
                     </div>
                 </div>
                 <div class="ml-auto flex items-center gap-2 flex-wrap">
@@ -836,6 +909,10 @@
                     </button>
                     <input type="file" id="import-input" accept=".lexor,.txt" class="hidden" />
                 </div>
+            </div>
+            <!-- TC Picker: shown when an increment button is clicked -->
+            <div id="tc-picker-wrap" class="tc-picker-wrap" aria-live="polite">
+                <div class="tc-picker" id="tc-picker" role="group" aria-label="Test case selector"></div>
             </div>
         </div>
 
@@ -1335,25 +1412,30 @@ END SCRIPT
             return lines.slice(startIdx, endIdx).join('\n');
         }
 
-        function buildIncrementBundle(markdown, incrementNumber) {
+        /**
+         * Parse individual test cases from a markdown increment section.
+         * Returns an array of { id, label, code } objects.
+         */
+        function parseIncrementTestCases(markdown, incrementNumber) {
             const section = getIncrementSection(markdown, incrementNumber);
-            if (!section.trim()) {
-                return '';
-            }
+            if (!section.trim()) return [];
 
             const lines = section.split(/\r?\n/);
-            const parts = [];
-            let currentCaseLabel = null;
+            const cases = [];
+            let currentId = null;
+            let currentLabel = null;
             let inFence = false;
             let codeLines = [];
-            let detectedAnyCode = false;
 
             for (const rawLine of lines) {
                 const line = rawLine.trim();
-                const tcMatch = line.match(/^####\s*(TC-\d+)\s*[-·]?\s*(.*)$/i);
+                const tcMatch = line.match(/^####\s*(TC-(\d+))\s*[-·]?\s*(.*)$/i);
                 if (tcMatch) {
-                    const suffix = (tcMatch[2] || '').trim();
-                    currentCaseLabel = suffix ? (tcMatch[1].toUpperCase() + ' - ' + suffix) : tcMatch[1].toUpperCase();
+                    currentId = tcMatch[1].toUpperCase();
+                    const suffix = (tcMatch[3] || '').trim();
+                    currentLabel = suffix ? (currentId + ' - ' + suffix) : currentId;
+                    inFence = false;
+                    codeLines = [];
                     continue;
                 }
 
@@ -1364,11 +1446,11 @@ END SCRIPT
                     } else {
                         inFence = false;
                         const code = codeLines.join('\n').trim();
-                        if (code) {
-                            detectedAnyCode = true;
-                            const label = currentCaseLabel || ('INCREMENT ' + incrementNumber + ' CASE');
-                            parts.push('%% ---------- ' + label + ' ----------\n' + code);
+                        if (code && currentId) {
+                            cases.push({ id: currentId, label: currentLabel || currentId, code });
                         }
+                        currentId = null;
+                        currentLabel = null;
                     }
                     continue;
                 }
@@ -1378,16 +1460,97 @@ END SCRIPT
                 }
             }
 
-            if (!detectedAnyCode) {
-                return '';
+            return cases;
+        }
+
+        function buildIncrementBundle(markdown, incrementNumber) {
+            const cases = parseIncrementTestCases(markdown, incrementNumber);
+            if (!cases.length) return '';
+            return cases.map(tc =>
+                '%% ---------- ' + tc.label + ' ----------\n' + tc.code
+            ).join('\n\n') + '\n';
+        }
+
+        /* ---- TC Picker state ---- */
+        const tcPickerWrap = document.getElementById('tc-picker-wrap');
+        const tcPickerEl   = document.getElementById('tc-picker');
+        let activeTcIncrementNumber = null;
+        let activeTcPill = null;
+
+        function closeTcPicker() {
+            tcPickerWrap.classList.remove('open');
+            tcPickerEl.innerHTML = '';
+            activeTcIncrementNumber = null;
+            activeTcPill = null;
+            document.querySelectorAll('.increment-btn').forEach(b => b.classList.remove('is-active'));
+        }
+
+        async function openTcPicker(incrementNumber, triggerBtn) {
+            // Toggle off if same increment is already open
+            if (activeTcIncrementNumber === incrementNumber) {
+                closeTcPicker();
+                return;
             }
 
-            return parts.join('\n\n') + '\n';
+            document.querySelectorAll('.increment-btn').forEach(b => b.classList.remove('is-active'));
+            triggerBtn.classList.add('is-active');
+            activeTcIncrementNumber = incrementNumber;
+            activeTcPill = null;
+            tcPickerEl.innerHTML = '';
+
+            // Label
+            const lbl = document.createElement('span');
+            lbl.className = 'tc-picker-label';
+            lbl.textContent = 'Test Cases';
+            tcPickerEl.appendChild(lbl);
+
+            // Show loading placeholder pills while fetching
+            tcPickerWrap.classList.add('open');
+
+            let cases;
+            try {
+                const markdown = await getTestCasesMarkdown();
+                cases = parseIncrementTestCases(markdown, incrementNumber);
+            } catch (err) {
+                clearConsole();
+                appendToConsole('Failed to load test cases: ' + err.message, true);
+                closeTcPicker();
+                return;
+            }
+
+            if (!cases.length) {
+                closeTcPicker();
+                clearConsole();
+                appendToConsole('No test cases found for Increment ' + incrementNumber + '.', true);
+                return;
+            }
+
+            // Build pill buttons
+            cases.forEach((tc, idx) => {
+                const pill = document.createElement('button');
+                pill.type = 'button';
+                pill.className = 'tc-pill';
+                // Zero-pad the index: TC-01, TC-02, …
+                const num = tc.id.replace(/^TC-0*(\d+)$/i, '$1');
+                pill.textContent = String(num).padStart(2, '0');
+                pill.title = tc.label;
+                pill.setAttribute('data-tc-id', tc.id);
+                pill.addEventListener('click', function () {
+                    if (activeTcPill) activeTcPill.classList.remove('is-active');
+                    pill.classList.add('is-active');
+                    activeTcPill = pill;
+                    const filename = 'increment_' + incrementNumber + '_' + tc.id.toLowerCase().replace(/-/g, '_') + '.lexor';
+                    loadProgramContent(filename, '%% ' + tc.label + '\n' + tc.code);
+                    clearConsole();
+                });
+                tcPickerEl.appendChild(pill);
+            });
         }
 
         sampleSelect.addEventListener('change', function () {
             const key = this.value;
             if (!key) return;
+            closeTcPicker();
             const sample = SAMPLES[key];
             if (!sample) return;
             loadProgramContent(sample.filename || 'untitled.lexor', sample.code || '');
@@ -1395,25 +1558,32 @@ END SCRIPT
 
         incrementButtons.forEach((button) => {
             button.addEventListener('click', async function () {
-                const increment = this.getAttribute('data-increment');
+                const increment = Number(this.getAttribute('data-increment'));
                 if (!increment) return;
 
-                if (increment !== '1') {
-                    const placeholder = '%% Iincrement ' + increment + ' is yet to be implemented...';
-                    loadProgramContent('increment_' + increment + '_test_cases.lexor', placeholder + '\n');
+                if (increment === 1) {
+                    await openTcPicker(1, this);
                     return;
                 }
 
-                try {
-                    const markdown = await getTestCasesMarkdown();
-                    const bundle = buildIncrementBundle(markdown, Number(increment));
-                    if (!bundle) {
-                        throw new Error('No test cases found for increment ' + increment + '.');
+                // Increments 2-4: close any open TC picker and load placeholder
+                closeTcPicker();
+                this.classList.add('is-active');
+                setTimeout(() => this.classList.remove('is-active'), 600);
+
+                if (increment === 2) {
+                    try {
+                        const markdown = await getTestCasesMarkdown();
+                        const bundle = buildIncrementBundle(markdown, 2);
+                        if (!bundle) throw new Error('No test cases found for increment 2.');
+                        loadProgramContent('increment_2_test_cases.lexor', bundle);
+                    } catch (err) {
+                        clearConsole();
+                        appendToConsole('Failed to load increment 2 test cases: ' + err.message, true);
                     }
-                    loadProgramContent('increment_' + increment + '_test_cases.lexor', bundle);
-                } catch (err) {
-                    clearConsole();
-                    appendToConsole('Failed to load increment ' + increment + ' test cases: ' + err.message, true);
+                } else {
+                    const placeholder = '%% Increment ' + increment + ' test cases are not yet implemented...';
+                    loadProgramContent('increment_' + increment + '_test_cases.lexor', placeholder + '\n');
                 }
             });
         });
@@ -1469,7 +1639,11 @@ END SCRIPT
                 if (data.error) {
                     appendToConsole(data.error, true);
                 } else {
-                    if (data.output) appendToConsole(data.output, false);
+                    if (data.output) {
+                        appendToConsole(data.output, false);
+                    } else {
+                        appendToConsole('Compiled successfully.', false);
+                    }
                 }
             } catch (err) {
                 appendToConsole('Error: ' + err.message, true);
