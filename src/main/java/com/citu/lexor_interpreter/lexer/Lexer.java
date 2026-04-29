@@ -194,21 +194,36 @@ public class Lexer {
     }
 
     private void escape() {
-        while (!isAtEnd() && peek() != ']') {
-            if (peek() == '\n') {
+        // Escape sequences start with '[' and normally end at the next ']'.
+        // To include a literal ']' inside the escape, write ']]' (double-close):
+        // e.g. `[]]` => content `]`, `[#]` => content `#`, `[[]` => content `[`.
+        StringBuilder content = new StringBuilder();
+
+        while (!isAtEnd()) {
+            char next = peek();
+
+            if (next == '\n') {
                 throw error("Unterminated escape sequence", currentLexeme());
             }
-            advance();
+
+            if (next == ']') {
+                // Treat `]]` as an escaped ']' character inside the escape.
+                if (peekNext() == ']') {
+                    advance(); // consume first ']'
+                    content.append(']');
+                    continue;
+                }
+
+                // Single ']' ends the escape.
+                advance(); // consume closing ']'
+                addToken(TokenType.STRING_LITERAL, content.toString());
+                return;
+            }
+
+            content.append(advance());
         }
 
-        if (isAtEnd()) {
-            throw error("Unterminated escape sequence", currentLexeme());
-        }
-
-        advance();
-        String full = currentLexeme();
-        String content = full.length() >= 2 ? full.substring(1, full.length() - 1) : "";
-        addToken(TokenType.STRING_LITERAL, content);
+        throw error("Unterminated escape sequence", currentLexeme());
     }
 
     private void identifierOrKeyword() {
