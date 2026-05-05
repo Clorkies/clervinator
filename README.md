@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <strong>Website Link: </strong> <a href="https://clervinator.onrender.com/">clervinator.onrender.com/</a>
+  <strong>Website Link: </strong> <a href="https://clervinator.onrender.com/">clervinator.onrender.com</a>
 </p>
 
 
