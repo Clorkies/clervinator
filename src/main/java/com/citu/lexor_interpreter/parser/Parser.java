@@ -87,6 +87,16 @@ public class Parser {
             || type == TokenType.BOOL_TYPE;
     }
 
+    private void requireNextTokenOnNewLine(int statementLine, String context) {
+        if (check(TokenType.EOF)) {
+            return;
+        }
+
+        if (peek().position().line() == statementLine) {
+            throw error("expected line break after " + context + "; only one statement is allowed per line");
+        }
+    }
+
     private Object parseTypedLiteral(Token token) {
         String raw = token.lexeme();
         return switch (token.type()) {
@@ -296,14 +306,20 @@ public class Parser {
         List<StatementNode> statements = new ArrayList<>();
 
         consume(TokenType.SCRIPT_AREA, "expected SCRIPT AREA at the beginning of program");
+        requireNextTokenOnNewLine(previous().position().line(), "SCRIPT AREA");
         consume(TokenType.START_SCRIPT, "expected START SCRIPT after SCRIPT AREA");
+        requireNextTokenOnNewLine(previous().position().line(), "START SCRIPT");
 
         while (check(TokenType.DECLARE)) {
+            int declarationLine = peek().position().line();
             statements.add(parseDeclareStatement());
+            requireNextTokenOnNewLine(declarationLine, "declaration");
         }
 
         while (!check(TokenType.END_SCRIPT) && !isAtEnd()) {
+            int statementLine = peek().position().line();
             statements.addAll(parseStatement());
+            requireNextTokenOnNewLine(statementLine, "statement");
         }
 
         consume(TokenType.END_SCRIPT, "expected END SCRIPT to close program");

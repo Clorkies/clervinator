@@ -243,5 +243,18 @@ class ParserTest {
         ParserException ex = assertThrows(ParserException.class, () -> parseProgram(source));
         assertTrue(ex.getMessage().contains("expected expression"));
     }
+
+    @Test
+    void parse_multipleStatementsOnSingleLine_throwsParserException() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT a=1 PRINT: a
+                END SCRIPT
+            """;
+
+        ParserException ex = assertThrows(ParserException.class, () -> parseProgram(source));
+        assertTrue(ex.getMessage().contains("only one statement is allowed per line"));
+    }
     
 }
