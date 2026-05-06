@@ -170,12 +170,24 @@ class LexerTest {
     }
 
     @Test
-    void lex_reservedWord_lowercaseSpellingsThrowLexerException() {
-        LexerException exPrint = assertThrows(LexerException.class, () -> new Lexer().lex("print: x"));
-        assertTrue(exPrint.getMessage().contains("CAPITAL LETTERS"));
+    void lex_reservedWord_spellingsOtherThanAllCaps_lexAsIdentifiers() {
+        List<Token> printStmt = new Lexer().lex("print: x");
+        assertTokenTypes(printStmt,
+            TokenType.IDENTIFIER,
+            TokenType.COLON,
+            TokenType.IDENTIFIER,
+            TokenType.EOF
+        );
+        assertEquals("print", printStmt.get(0).lexeme());
 
-        LexerException exDeclare = assertThrows(LexerException.class, () -> new Lexer().lex("DECLARE int x"));
-        assertTrue(exDeclare.getMessage().contains("CAPITAL LETTERS"));
+        List<Token> declareLine = new Lexer().lex("DECLARE int x");
+        assertTokenTypes(declareLine,
+            TokenType.DECLARE,
+            TokenType.IDENTIFIER,
+            TokenType.IDENTIFIER,
+            TokenType.EOF
+        );
+        assertEquals("int", declareLine.get(1).lexeme());
     }
 
     @Test

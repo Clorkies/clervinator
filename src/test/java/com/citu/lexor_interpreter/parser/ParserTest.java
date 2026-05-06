@@ -10,6 +10,8 @@ import com.citu.lexor_interpreter.lexer.Lexer;
 import com.citu.lexor_interpreter.parser.ast.ProgramNode;
 import com.citu.lexor_interpreter.lexer.token.TokenType;
 import com.citu.lexor_interpreter.parser.ast.DeclareNode;
+import com.citu.lexor_interpreter.parser.ast.PrintNode;
+import com.citu.lexor_interpreter.parser.ast.expression.VariableNode;
 
 class ParserTest {
     
@@ -256,5 +258,29 @@ class ParserTest {
         ParserException ex = assertThrows(ParserException.class, () -> parseProgram(source));
         assertTrue(ex.getMessage().contains("only one statement is allowed per line"));
     }
-    
+
+    @Test
+    void parse_variableName_lowerCaseSpellingOfReservedWord_isIdentifier() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT print=10
+                PRINT: print
+                END SCRIPT
+            """;
+
+        ProgramNode program = parseProgram(source);
+
+        assertEquals(2, program.statements().size());
+        assertTrue(program.statements().get(0) instanceof DeclareNode);
+        DeclareNode declare = (DeclareNode) program.statements().get(0);
+        assertEquals("print", declare.declarations().get(0).name());
+
+        assertTrue(program.statements().get(1) instanceof PrintNode);
+        PrintNode print = (PrintNode) program.statements().get(1);
+        assertEquals(1, print.expressions().size());
+        assertTrue(print.expressions().get(0) instanceof VariableNode);
+        assertEquals("print", ((VariableNode) print.expressions().get(0)).name());
+    }
+
 }

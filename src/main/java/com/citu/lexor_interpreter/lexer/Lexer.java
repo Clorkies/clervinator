@@ -221,15 +221,6 @@ public class Lexer {
         throw error("Unterminated escape sequence", currentLexeme());
     }
 
-    private void enforceReservedCapitalSpelling(String actualLexeme, String expectedAllCaps) {
-        if (!expectedAllCaps.equals(actualLexeme)) {
-            throw error(
-                "Reserved words must be written in CAPITAL LETTERS (expected '" + expectedAllCaps + "')",
-                actualLexeme
-            );
-        }
-    }
-
     private void identifierOrKeyword() {
         while (isIdentifierPart(peek())) {
             advance();
@@ -238,14 +229,12 @@ public class Lexer {
         String firstWord = currentLexeme();
         String upper = firstWord.toUpperCase();
 
-        if ("SCRIPT".equals(upper)) {
-            enforceReservedCapitalSpelling(firstWord, "SCRIPT");
+        if ("SCRIPT".equals(upper) && "SCRIPT".equals(firstWord)) {
             if (tryReadSecondWord("AREA")) {
                 addToken(TokenType.SCRIPT_AREA, currentLexeme());
                 return;
             }
-        } else if ("START".equals(upper)) {
-            enforceReservedCapitalSpelling(firstWord, "START");
+        } else if ("START".equals(upper) && "START".equals(firstWord)) {
             if (tryReadSecondWord("SCRIPT")) {
                 addToken(TokenType.START_SCRIPT, currentLexeme());
                 return;
@@ -262,8 +251,7 @@ public class Lexer {
                 addToken(TokenType.START_REPEAT, currentLexeme());
                 return;
             }
-        } else if ("END".equals(upper)) {
-            enforceReservedCapitalSpelling(firstWord, "END");
+        } else if ("END".equals(upper) && "END".equals(firstWord)) {
             if (tryReadSecondWord("SCRIPT")) {
                 addToken(TokenType.END_SCRIPT, currentLexeme());
                 return;
@@ -280,8 +268,7 @@ public class Lexer {
                 addToken(TokenType.END_REPEAT, currentLexeme());
                 return;
             }
-        } else if ("ELSE".equals(upper)) {
-            enforceReservedCapitalSpelling(firstWord, "ELSE");
+        } else if ("ELSE".equals(upper) && "ELSE".equals(firstWord)) {
             if (tryReadSecondWord("IF")) {
                 addToken(TokenType.ELSE_IF, currentLexeme());
                 return;
@@ -289,8 +276,7 @@ public class Lexer {
         }
 
         TokenType mapped = KEYWORDS.get(upper);
-        if (mapped != null) {
-            enforceReservedCapitalSpelling(firstWord, upper);
+        if (mapped != null && firstWord.equals(upper)) {
             addToken(mapped, firstWord);
             return;
         }
