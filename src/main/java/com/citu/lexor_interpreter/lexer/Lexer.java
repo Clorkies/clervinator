@@ -221,6 +221,15 @@ public class Lexer {
         throw error("Unterminated escape sequence", currentLexeme());
     }
 
+    private void enforceReservedCapitalSpelling(String actualLexeme, String expectedAllCaps) {
+        if (!expectedAllCaps.equals(actualLexeme)) {
+            throw error(
+                "Reserved words must be written in CAPITAL LETTERS (expected '" + expectedAllCaps + "')",
+                actualLexeme
+            );
+        }
+    }
+
     private void identifierOrKeyword() {
         while (isIdentifierPart(peek())) {
             advance();
@@ -230,11 +239,13 @@ public class Lexer {
         String upper = firstWord.toUpperCase();
 
         if ("SCRIPT".equals(upper)) {
+            enforceReservedCapitalSpelling(firstWord, "SCRIPT");
             if (tryReadSecondWord("AREA")) {
                 addToken(TokenType.SCRIPT_AREA, currentLexeme());
                 return;
             }
         } else if ("START".equals(upper)) {
+            enforceReservedCapitalSpelling(firstWord, "START");
             if (tryReadSecondWord("SCRIPT")) {
                 addToken(TokenType.START_SCRIPT, currentLexeme());
                 return;
@@ -252,6 +263,7 @@ public class Lexer {
                 return;
             }
         } else if ("END".equals(upper)) {
+            enforceReservedCapitalSpelling(firstWord, "END");
             if (tryReadSecondWord("SCRIPT")) {
                 addToken(TokenType.END_SCRIPT, currentLexeme());
                 return;
@@ -268,13 +280,22 @@ public class Lexer {
                 addToken(TokenType.END_REPEAT, currentLexeme());
                 return;
             }
-        } else if ("ELSE".equals(upper) && tryReadSecondWord("IF")) {
-            addToken(TokenType.ELSE_IF, currentLexeme());
+        } else if ("ELSE".equals(upper)) {
+            enforceReservedCapitalSpelling(firstWord, "ELSE");
+            if (tryReadSecondWord("IF")) {
+                addToken(TokenType.ELSE_IF, currentLexeme());
+                return;
+            }
+        }
+
+        TokenType mapped = KEYWORDS.get(upper);
+        if (mapped != null) {
+            enforceReservedCapitalSpelling(firstWord, upper);
+            addToken(mapped, firstWord);
             return;
         }
 
-        TokenType tokenType = KEYWORDS.getOrDefault(upper, TokenType.IDENTIFIER);
-        addToken(tokenType, firstWord);
+        addToken(TokenType.IDENTIFIER, firstWord);
     }
 
     private boolean tryReadSecondWord(String expectedWord) {
@@ -297,8 +318,8 @@ public class Lexer {
         while (isIdentifierPart(peek())) {
             advance();
         }
-        String second = code.substring(secondStart, currentIndex).toUpperCase();
-        if (!expectedWord.equals(second)) {
+        String rawSecond = code.substring(secondStart, currentIndex);
+        if (!expectedWord.equals(rawSecond)) {
             currentIndex = savedIndex;
             line = savedLine;
             col = savedCol;

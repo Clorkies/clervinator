@@ -170,6 +170,15 @@ class LexerTest {
     }
 
     @Test
+    void lex_reservedWord_lowercaseSpellingsThrowLexerException() {
+        LexerException exPrint = assertThrows(LexerException.class, () -> new Lexer().lex("print: x"));
+        assertTrue(exPrint.getMessage().contains("CAPITAL LETTERS"));
+
+        LexerException exDeclare = assertThrows(LexerException.class, () -> new Lexer().lex("DECLARE int x"));
+        assertTrue(exDeclare.getMessage().contains("CAPITAL LETTERS"));
+    }
+
+    @Test
     void lex_escape_sequence_allowsLeftBracketContent() {
         // `[[]` => escape content `[`
         String source = "PRINT: [[]";
