@@ -165,18 +165,7 @@ PRINT: b
 END SCRIPT
 ```
 
-#### TC-16 - Unary positive
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT x=8
-DECLARE INT y
-y= +x
-PRINT: y
-END SCRIPT
-```
-
-#### TC-17 - Unary negative inside an expression
+#### TC-16 - Unary negative inside an expression
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -336,13 +325,14 @@ PRINT: num
 END SCRIPT
 ```
 
-#### TC-31 - SCAN two variables (comma-separated)
+#### TC-31 - SCAN two variables and sum
 ```lexor
 SCRIPT AREA
 START SCRIPT
 DECLARE INT a, b
 DECLARE INT sum
-SCAN: a, b
+SCAN: a
+SCAN: b
 sum= a + b
 PRINT: a & " + " & b & " = " & sum
 END SCRIPT

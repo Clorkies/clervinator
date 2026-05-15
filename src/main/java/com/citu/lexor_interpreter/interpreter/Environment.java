@@ -20,10 +20,6 @@ public class Environment {
         variables.put(name, new VariableInfo(type, getDefaultValue(type)));
     }
 
-    /**
-     * Assigns a new value to an existing variable.
-     * Performs type checking during assignment.
-     */
     public void assign(String name, Object value) {
         if (!variables.containsKey(name)) {
             throw new ParserException("Variable '" + name + "' has not been declared.");
@@ -34,9 +30,6 @@ public class Environment {
         variables.put(name, new VariableInfo(info.type(), value));
     }
 
-    /**
-     * Retrieves the value of a variable.
-     */
     public Object get(String name) {
         if (!variables.containsKey(name)) {
             throw new ParserException("Variable '" + name + "' has not been declared.");
@@ -65,7 +58,7 @@ public class Environment {
     private void validateType(TokenType expected, Object value) {
         boolean valid = switch (expected) {
             case INT_TYPE -> value instanceof Integer;
-            case FLOAT_TYPE -> value instanceof Float || value instanceof Double || value instanceof Integer;
+            case FLOAT_TYPE -> value instanceof Float || value instanceof Double;
             case CHAR_TYPE -> value instanceof Character;
             case BOOL_TYPE -> value instanceof Boolean;
             default -> false;
