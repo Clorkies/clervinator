@@ -1,5 +1,6 @@
 package com.citu.lexor_interpreter.service;
 
+import com.citu.lexor_interpreter.interpreter.InputRequiredException;
 import com.citu.lexor_interpreter.interpreter.Interpreter;
 import com.citu.lexor_interpreter.lexer.Lexer;
 import com.citu.lexor_interpreter.lexer.LexerException;
@@ -36,10 +37,15 @@ public class InterpreterService {
 
             // Interpreting
             Interpreter interpreter = new Interpreter();
-            String result = interpreter.interpret(program, inputs != null ? inputs : List.of());
-
-            List<Object> responseTokens = new ArrayList<>(tokens);
-            return ExecuteResponse.success(result, responseTokens);
+            try {
+                String result = interpreter.interpret(program, inputs != null ? inputs : List.of());
+                List<Object> responseTokens = new ArrayList<>(tokens);
+                return ExecuteResponse.success(result, responseTokens);
+            } catch (InputRequiredException ire) {
+                List<Object> responseTokens = new ArrayList<>(tokens);
+                // Return whatever output was generated BEFORE the interpreter stopped
+                return ExecuteResponse.waiting(interpreter.getOutput(), responseTokens);
+            }
 
         } catch (LexerException | ParserException e) {
             return ExecuteResponse.withError(e.getMessage());

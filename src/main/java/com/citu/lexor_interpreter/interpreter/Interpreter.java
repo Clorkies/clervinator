@@ -32,6 +32,10 @@ public class Interpreter {
         return output.toString();
     }
 
+    public String getOutput() {
+        return output.toString();
+    }
+
     // Statement dispatch
     private void execute(StatementNode statement) {
         if (statement instanceof DeclareNode node) {
@@ -76,9 +80,13 @@ public class Interpreter {
     // SCAN
     private void executeScan(ScanNode node) {
         if (inputQueue == null || inputIndex >= inputQueue.size()) {
-            throw new ParserException("SCAN requires input but none was provided for variable '" + node.variableName() + "'");
+            throw new InputRequiredException("SCAN requires input for variable '" + node.variableName() + "'");
         }
         String raw = inputQueue.get(inputIndex++);
+        
+        // Echo input so it appears in the console (like a real terminal)
+        output.append(raw).append("\n");
+        
         Object converted = convertInput(node.variableName(), raw);
         environment.assign(node.variableName(), converted);
     }
