@@ -167,11 +167,11 @@ public class Interpreter {
             case MINUS -> l - r;
             case MULTIPLY -> l * r;
             case DIVIDE -> {
-                if (r == 0) throw new ParserException("Division by zero");
+                if (r == 0) throw new ParserException("ArithmeticError: Division by zero");
                 yield l / r;
             }
             case MODULO -> {
-                if (r == 0) throw new ParserException("Modulo by zero");
+                if (r == 0) throw new ParserException("ArithmeticError: Modulo by zero");
                 yield l % r;
             }
             default -> throw new ParserException("Unknown arithmetic operator");

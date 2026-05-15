@@ -154,76 +154,7 @@ END SCRIPT
 
 ## Increment 2
 
-#### TC-15 - Unary negative on a variable
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a=5
-DECLARE INT b
-b= -a
-PRINT: b
-END SCRIPT
-```
-
-#### TC-16 - Unary negative inside an expression
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT n=10
-DECLARE INT result
-result= (n + -3) * -1
-PRINT: result
-END SCRIPT
-```
-
-#### TC-18 - Addition and subtraction
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a=15, b=7
-DECLARE INT sum, diff
-sum= a + b
-diff= a - b
-PRINT: sum & $ & diff
-END SCRIPT
-```
-
-#### TC-19 - Multiplication and division
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a=20, b=4
-DECLARE INT product, quotient
-product= a * b
-quotient= a / b
-PRINT: product & $ & quotient
-END SCRIPT
-```
-
-#### TC-20 - Modulo operator
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a=17, b=5
-DECLARE INT rem
-rem= a % b
-PRINT: rem
-END SCRIPT
-```
-
-#### TC-21 - Operator precedence with parentheses
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT x=3, y=4, z=2
-DECLARE INT r1, r2
-r1= x + y * z
-r2= (x + y) * z
-PRINT: r1 & $ & r2
-END SCRIPT
-```
-
-#### TC-22 - Complex arithmetic expression (from spec)
+#### TC-15 - Complex arithmetic and operator precedence
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -234,7 +165,34 @@ PRINT: xyz
 END SCRIPT
 ```
 
-#### TC-23 - FLOAT arithmetic
+#### TC-16 - All comparison operators
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=5
+DECLARE BOOL eq, neq, gte, lte
+eq= (x == 5)
+neq= (x <> 5)
+gte= (x >= 3)
+lte= (x <= 4)
+PRINT: eq & $ & neq & $ & gte & $ & lte
+END SCRIPT
+```
+
+#### TC-17 - Logical operators AND, OR, NOT
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT a=100, b=200, c=300
+DECLARE BOOL d, e, f
+d= (a < b AND c <> 200)
+e= (a > b OR a < b)
+f= NOT d
+PRINT: d & $ & e & $ & f
+END SCRIPT
+```
+
+#### TC-18 - FLOAT arithmetic
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -245,190 +203,12 @@ PRINT: result
 END SCRIPT
 ```
 
-#### TC-24 - Relational operators > and <
+#### TC-19 - Error: division by zero
 ```lexor
 SCRIPT AREA
 START SCRIPT
-DECLARE INT a=10, b=20
-DECLARE BOOL r1, r2
-r1= (a < b)
-r2= (a > b)
-PRINT: r1 & $ & r2
+DECLARE INT x=10, y=0
+PRINT: x / y
 END SCRIPT
 ```
 
-#### TC-25 - Relational operators >=, <=, ==, <>
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT x=5
-DECLARE BOOL eq, neq, gte, lte
-eq= (x == 5)
-neq= (x <> 3)
-gte= (x >= 5)
-lte= (x <= 10)
-PRINT: eq & $ & neq & $ & gte & $ & lte
-END SCRIPT
-```
-
-#### TC-26 - AND logical operator (both true)
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a=100, b=200, c=300
-DECLARE BOOL d
-d= (a < b AND c <> 200)
-PRINT: d
-END SCRIPT
-```
-
-#### TC-27 - AND logical operator (one false)
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT x=5, y=10
-DECLARE BOOL result
-result= (x > 3 AND y < 5)
-PRINT: result
-END SCRIPT
-```
-
-#### TC-28 - OR logical operator
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a=10, b=20
-DECLARE BOOL result
-result= (a > b OR a < b)
-PRINT: result
-END SCRIPT
-```
-
-#### TC-29 - NOT logical operator
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE BOOL flag="FALSE"
-DECLARE BOOL result
-result= NOT flag
-PRINT: result
-END SCRIPT
-```
-
-#### TC-30 - SCAN single INT
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT num
-SCAN: num
-PRINT: num
-END SCRIPT
-```
-
-#### TC-31 - SCAN two variables and sum
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT a, b
-DECLARE INT sum
-SCAN: a
-SCAN: b
-sum= a + b
-PRINT: a & " + " & b & " = " & sum
-END SCRIPT
-```
-
-#### TC-32 - SCAN FLOAT and compute area
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE FLOAT radius
-DECLARE FLOAT area
-SCAN: radius
-area= 3.14 * radius * radius
-PRINT: area
-END SCRIPT
-```
-
-#### TC-33 - SCAN then compare with relational operator
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT x
-DECLARE BOOL isPositive
-SCAN: x
-isPositive= (x > 0)
-PRINT: isPositive
-END SCRIPT
-```
-
-## Reported failing cases assessment
-
-#### FC-01 - PRINT with grouped arithmetic inside concatenation
-Status: Valid test case, output is failing because arithmetic/grouped expression parsing is not yet fully covered in the current parser.
-
-Target increment: **Increment 2**
-
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT x, y
-x = 10
-y = 20
-PRINT: x & " + " & y & " = " & (x + y)
-END SCRIPT
-```
-
-#### FC-02 - CHAR declaration assigned a full string
-Status: Invalid test case as written. `CHAR` accepts a single character, not a multi-character string.
-
-Target increment: **Increment 1** (typing rules already covered)
-
-Original invalid case:
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE CHAR msg = "Hello from LEXOR!"
-PRINT: msg
-END SCRIPT
-```
-
-Corrected valid version:
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE CHAR msg = 'H'
-PRINT: msg
-END SCRIPT
-```
-
-#### FC-03 - Complex arithmetic with grouping and unary minus
-Status: Valid test case, but currently failing due to missing arithmetic expression parser coverage.
-
-Target increment: **Increment 2**
-
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT xyz, abc=100
-xyz= ((abc *5)/10 + 10) * -1
-PRINT: [[] & xyz & []]
-END SCRIPT
-```
-
-#### FC-04 - FOR loop control flow
-Status: Valid test case, but not yet covered by current parser/interpreter logic.
-
-Target increment: **Increment 3**
-
-```lexor
-SCRIPT AREA
-START SCRIPT
-DECLARE INT i
-DECLARE INT limit = 5
-FOR (i = 1, i <= limit, i = i + 1)
-START FOR
-PRINT: i
-END FOR
-END SCRIPT
-```

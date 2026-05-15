@@ -65,7 +65,7 @@ public class Environment {
         };
 
         if (!valid) {
-            throw new ParserException("Type mismatch: Cannot assign " + 
+            throw new ParserException("TypeError: Type mismatch: Cannot assign " + 
                 value.getClass().getSimpleName() + " to " + expected);
         }
     }

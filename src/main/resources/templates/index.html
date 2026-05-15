@@ -1561,32 +1561,20 @@ END SCRIPT
                 const increment = Number(this.getAttribute('data-increment'));
                 if (!increment) return;
 
-                if (increment === 1) {
-                    await openTcPicker(1, this);
+                if (increment === 1 || increment === 2) {
+                    await openTcPicker(increment, this);
                     return;
                 }
 
-                // Increments 2-4: close any open TC picker and load placeholder
+                // Increments 3-4: placeholder
                 closeTcPicker();
                 this.classList.add('is-active');
                 setTimeout(() => this.classList.remove('is-active'), 600);
-
-                if (increment === 2) {
-                    try {
-                        const markdown = await getTestCasesMarkdown();
-                        const bundle = buildIncrementBundle(markdown, 2);
-                        if (!bundle) throw new Error('No test cases found for increment 2.');
-                        loadProgramContent('increment_2_test_cases.lexor', bundle);
-                    } catch (err) {
-                        clearConsole();
-                        appendToConsole('Failed to load increment 2 test cases: ' + err.message, true);
-                    }
-                } else {
-                    const placeholder = '%% Increment ' + increment + ' test cases are not yet implemented...';
-                    loadProgramContent('increment_' + increment + '_test_cases.lexor', placeholder + '\n');
-                }
+                const placeholder = '%% Increment ' + increment + ' test cases are not yet implemented...';
+                loadProgramContent('increment_' + increment + '_test_cases.lexor', placeholder + '\n');
             });
         });
+
 
         saveBtn.addEventListener('click', function () {
             const code = editor ? editor.getValue() : '';
