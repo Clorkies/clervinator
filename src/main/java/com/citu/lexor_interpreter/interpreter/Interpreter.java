@@ -26,6 +26,9 @@ public class Interpreter {
         for (StatementNode statement : program.statements()) {
             execute(statement);
         }
+        if (inputQueue != null && inputIndex < inputQueue.size()) {
+            throw new ParserException("Too many inputs provided. Expected exactly " + inputIndex + " inputs.");
+        }
         return output.toString();
     }
 
@@ -123,6 +126,11 @@ public class Interpreter {
                 if (operand instanceof Integer i) yield -i;
                 if (operand instanceof Double d) yield -d;
                 throw new ParserException("Unary minus requires a numeric operand");
+            }
+            case PLUS -> {
+                if (operand instanceof Integer i) yield i;
+                if (operand instanceof Double d) yield d;
+                throw new ParserException("Unary plus requires a numeric operand");
             }
             default -> throw new ParserException("Unknown unary operator: " + node.operator());
         };

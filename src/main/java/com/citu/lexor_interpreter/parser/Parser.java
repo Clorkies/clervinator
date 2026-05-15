@@ -186,13 +186,16 @@ public class Parser {
         return left;
     }
 
-    // Unary: NOT, -
+    // Unary: NOT, -, +
     private ExpressionNode parseUnary() {
         if (match(TokenType.NOT)) {
             return new UnaryExpressionNode(TokenType.NOT, parseUnary());
         }
         if (match(TokenType.MINUS)) {
             return new UnaryExpressionNode(TokenType.MINUS, parseUnary());
+        }
+        if (match(TokenType.PLUS)) {
+            return new UnaryExpressionNode(TokenType.PLUS, parseUnary());
         }
         return parsePrimary();
     }
@@ -241,12 +244,21 @@ public class Parser {
         return parseExpression();
     }
 
-    // SCAN: variableName
-    private ScanNode parseScanStatement() {
+    // SCAN: variableName, variableName...
+    private List<StatementNode> parseScanStatement() {
         consume(TokenType.SCAN, "expected SCAN");
         consume(TokenType.COLON, "expected ':' after SCAN");
+        
+        List<StatementNode> scans = new ArrayList<>();
         Token name = consume(TokenType.IDENTIFIER, "expected variable name after SCAN:");
-        return new ScanNode(name.lexeme());
+        scans.add(new ScanNode(name.lexeme()));
+
+        while (match(TokenType.COMMA)) {
+            name = consume(TokenType.IDENTIFIER, "expected variable name after comma in SCAN statement");
+            scans.add(new ScanNode(name.lexeme()));
+        }
+        
+        return scans;
     }
 
     private List<StatementNode> parseAssignmentStatement() {
@@ -283,7 +295,7 @@ public class Parser {
         }
 
         if (check(TokenType.SCAN)) {
-            return List.of(parseScanStatement());
+            return parseScanStatement();
         }
 
         if (check(TokenType.IDENTIFIER) && peekNext().type() == TokenType.ASSIGN) {

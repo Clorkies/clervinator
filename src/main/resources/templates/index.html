@@ -832,6 +832,58 @@
                 align-items: flex-start;
             }
         }
+        /* ---- Input Pane (Left side, bottom) ---- */
+        .input-pane {
+            flex: 0 0 auto;
+            border-top: 1px solid var(--border-panel);
+            background: var(--bg-editor);
+            display: none;
+            flex-direction: column;
+            padding: 0.5rem;
+        }
+        .input-pane.is-visible {
+            display: flex;
+        }
+        .input-pane-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.2rem;
+            padding: 0 0.5rem;
+        }
+        .input-pane-hint {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            opacity: 0.6;
+        }
+        #input-box {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            color: var(--text);
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.5rem;
+            resize: vertical;
+            min-height: 80px;
+            max-height: 300px;
+            outline: none;
+            line-height: 1.5;
+        }
+        #input-box:focus {
+            border-color: transparent;
+            box-shadow: none;
+        }
+        #input-box::placeholder {
+            color: var(--text-muted);
+            opacity: 0.3;
+        }
+        #input-box:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -934,6 +986,23 @@
                     <div class="editor-pane">
                         <div class="editor-wrapper">
                             <div id="lexor-editor"></div>
+                        </div>
+                        <div class="input-pane" id="input-pane-container">
+                            <div class="input-pane-header">
+                                <div>
+                                    <div class="file-meta-label" style="color: var(--accent);">INPUT REQUIRED</div>
+                                    <div class="file-meta-name">Terminal Input</div>
+                                </div>
+                                <div class="input-pane-hint">
+                                    Comma or newline separated
+                                </div>
+                            </div>
+                            <textarea
+                                id="input-box"
+                                spellcheck="false"
+                                autocomplete="off"
+                                placeholder="Type inputs for SCAN statements here (comma or newline separated)..."
+                            ></textarea>
                         </div>
                     </div>
                     <div
@@ -1351,6 +1420,14 @@ END SCRIPT
                 editor.setValue(content || '');
             }
             setFilename(filename || 'untitled.lexor');
+            resetInputPane();
+        }
+
+        function resetInputPane() {
+            const inputPane = document.getElementById('input-pane-container');
+            const inputBox = document.getElementById('input-box');
+            inputPane.classList.remove('is-visible');
+            inputBox.value = '';
         }
 
         function normalizeFilename(name) {
@@ -1609,17 +1686,75 @@ END SCRIPT
             setFilename(normalized);
         });
 
+        function stripComments(code) {
+            return code.replace(/%%.*/g, '');
+        }
+
+        function hasScanStatement(code) {
+            return /\bSCAN:/i.test(stripComments(code));
+        }
+
+        function countExpectedScanLines(code) {
+            const matches = stripComments(code).match(/\bSCAN:/gi);
+            return matches ? matches.length : 0;
+        }
+
+        const inputBoxEl = document.getElementById('input-box');
+        
+        inputBoxEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const code = editor ? editor.getValue() : '';
+                const expectedScanLines = countExpectedScanLines(code);
+                
+                const currentLinesCount = inputBoxEl.value.split('\n').length;
+                
+                if (currentLinesCount >= expectedScanLines) {
+                    e.preventDefault();
+                    runBtn.click();
+                }
+            }
+        });
+
         runBtn.addEventListener('click', async function () {
             const code = editor ? editor.getValue() : '';
+            const inputPane = document.getElementById('input-pane-container');
+            const inputBox = document.getElementById('input-box');
+
+            if (hasScanStatement(code)) {
+                if (!inputPane.classList.contains('is-visible')) {
+                    inputPane.classList.add('is-visible');
+                    inputBox.focus();
+                    clearConsole();
+                    appendToConsole('Program requires input.\nPlease enter the values in the Terminal Input panel below and press Enter.', false);
+                    return; 
+                }
+
+                const rawInputs = inputBox.value.trim();
+                const expectedScanLines = countExpectedScanLines(code);
+                const currentLinesCount = rawInputs ? rawInputs.split('\n').length : 0;
+
+                if (currentLinesCount < expectedScanLines) {
+                    inputBox.focus();
+                    clearConsole();
+                    appendToConsole('Error: SCAN statements detected but not enough input lines provided (Expected: ' + expectedScanLines + ').\nPlease enter values and press Enter.', true);
+                    return; 
+                }
+            } else {
+                resetInputPane();
+            }
+
             showConsoleLoadingState('Running program and fetching output');
             runBtn.disabled = true;
             runBtn.querySelector('i').className = 'bi bi-hourglass-split me-1';
 
             try {
+                const rawInputs = inputBox.value.trim();
+                const inputs = rawInputs ? rawInputs.split(/[\n,]/).map(s => s.trim()) : [];
+
                 const res = await fetch('/api/execute', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: code
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, inputs })
                 });
                 const data = await res.json();
                 clearConsole();
@@ -1632,6 +1767,7 @@ END SCRIPT
                     } else {
                         appendToConsole('Compiled successfully.', false);
                     }
+                    resetInputPane();
                 }
             } catch (err) {
                 appendToConsole('Error: ' + err.message, true);
@@ -1772,8 +1908,17 @@ END SCRIPT
                 scrollBeyondLastLine: false,
                 padding: { top: 12 }
             });
+            
+            editor.onDidChangeModelContent(() => {
+                const code = editor.getValue();
+                if (!hasScanStatement(code)) {
+                    resetInputPane();
+                }
+            });
+
             setFilename('untitled.lexor');
             initEditorOutputResizer();
+            resetInputPane();
         });
     </script>
 </body>

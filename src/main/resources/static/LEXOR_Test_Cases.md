@@ -154,7 +154,20 @@ END SCRIPT
 
 ## Increment 2
 
-#### TC-15 - Complex arithmetic and operator precedence
+#### TC-15 - Unary operator
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT a=5, b=-6
+DECLARE INT c,d,e
+c= -a
+d= --a
+e= +b
+PRINT: c & $ & d & $ & e
+END SCRIPT
+```
+
+#### TC-16 - Complex arithmetic and operator precedence
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -165,7 +178,7 @@ PRINT: xyz
 END SCRIPT
 ```
 
-#### TC-16 - All comparison operators
+#### TC-17 - All comparison operators
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -179,7 +192,7 @@ PRINT: eq & $ & neq & $ & gte & $ & lte
 END SCRIPT
 ```
 
-#### TC-17 - Logical operators AND, OR, NOT
+#### TC-18 - Logical operators AND, OR, NOT
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -192,7 +205,7 @@ PRINT: d & $ & e & $ & f
 END SCRIPT
 ```
 
-#### TC-18 - FLOAT arithmetic
+#### TC-19 - FLOAT arithmetic
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -203,7 +216,7 @@ PRINT: result
 END SCRIPT
 ```
 
-#### TC-19 - Error: division by zero
+#### TC-20 - Error: division by zero
 ```lexor
 SCRIPT AREA
 START SCRIPT
@@ -212,3 +225,12 @@ PRINT: x / y
 END SCRIPT
 ```
 
+#### TC-21 - SCAN: read input and compute product
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x, y
+SCAN: x, y
+PRINT: x * y
+END SCRIPT
+```
