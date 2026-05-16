@@ -21,17 +21,18 @@ class InterpreterTest {
         assertNotNull(response.error(), "Expected an error but got output: " + response.output());
     }
 
-    // Strong typing: FLOAT variable must not accept INT literal
+    // FLOAT accepts integer-shaped values and displays them as floats
     @Test
-    void testStrongTyping_intAssignedToFloat_throwsError() {
+    void testFloat_acceptsIntLiteralAndAssignment() {
         String code = """
             SCRIPT AREA
             START SCRIPT
-            DECLARE FLOAT g
+            DECLARE FLOAT x=5, g
             g=4
+            PRINT: x & $ & g
             END SCRIPT
             """;
-        expectError(code);
+        assertEquals("5.0\n4.0", run(code));
     }
 
     // Strong typing: FLOAT variable must not accept BOOL

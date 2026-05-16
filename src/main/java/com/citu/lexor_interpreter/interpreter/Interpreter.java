@@ -83,11 +83,16 @@ public class Interpreter {
             throw new InputRequiredException("SCAN requires input for variable '" + node.variableName() + "'");
         }
         String raw = inputQueue.get(inputIndex++);
-        
-        // Echo input so it appears in the console (like a real terminal)
-        output.append(raw).append("\n");
-        
         Object converted = convertInput(node.variableName(), raw);
+
+        // Echo input so it appears in the console (like a real terminal)
+        TokenType varType = environment.getType(node.variableName());
+        if (varType == TokenType.FLOAT_TYPE) {
+            output.append(formatFloat((Number) converted)).append("\n");
+        } else {
+            output.append(raw).append("\n");
+        }
+
         environment.assign(node.variableName(), converted);
     }
 
@@ -222,10 +227,19 @@ public class Interpreter {
     // Stringify for PRINT output
     private String stringify(Object value) {
         if (value instanceof Boolean b) return b ? "TRUE" : "FALSE";
-        if (value instanceof Double d) {
-            if (d == Math.floor(d) && !Double.isInfinite(d)) return String.valueOf((int) d.doubleValue());
+        if (value instanceof Double d) return formatFloat(d);
+        if (value instanceof Float f) return formatFloat(f);
+        return String.valueOf(value);
+    }
+
+    static String formatFloat(Number value) {
+        double d = value.doubleValue();
+        if (Double.isNaN(d) || Double.isInfinite(d)) {
             return String.valueOf(d);
         }
-        return String.valueOf(value);
+        if (d == Math.floor(d)) {
+            return (long) d + ".0";
+        }
+        return String.valueOf(d);
     }
 }

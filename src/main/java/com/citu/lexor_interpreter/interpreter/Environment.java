@@ -26,8 +26,9 @@ public class Environment {
         }
 
         VariableInfo info = variables.get(name);
-        validateType(info.type(), value);
-        variables.put(name, new VariableInfo(info.type(), value));
+        Object coerced = coerceToDeclaredType(info.type(), value);
+        validateType(info.type(), coerced);
+        variables.put(name, new VariableInfo(info.type(), coerced));
     }
 
     public Object get(String name) {
@@ -53,6 +54,18 @@ public class Environment {
             case BOOL_TYPE -> false;
             default -> throw new ParserException("Unsupported variable type: " + type);
         };
+    }
+
+    private Object coerceToDeclaredType(TokenType type, Object value) {
+        if (type == TokenType.FLOAT_TYPE) {
+            if (value instanceof Integer i) {
+                return i.doubleValue();
+            }
+            if (value instanceof Float f) {
+                return f.doubleValue();
+            }
+        }
+        return value;
     }
 
     private void validateType(TokenType expected, Object value) {

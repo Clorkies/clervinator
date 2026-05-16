@@ -213,7 +213,7 @@ class Increment2Test {
             PRINT: x
             END SCRIPT
             """;
-        assertEquals("42", run(code, List.of("42")));
+        assertEquals("42\n42", run(code, List.of("42")));
     }
 
     @Test
@@ -227,7 +227,7 @@ class Increment2Test {
             PRINT: a+b
             END SCRIPT
             """;
-        assertEquals("15", run(code, List.of("10", "5")));
+        assertEquals("10\n5\n15", run(code, List.of("10", "5")));
     }
 
     // Float arithmetic
@@ -240,7 +240,20 @@ class Increment2Test {
             PRINT: x+y
             END SCRIPT
             """;
-        assertEquals("4", run(code));
+        assertEquals("4.0", run(code));
+    }
+
+    @Test
+    void testFloat_scanAcceptsIntegerInput() {
+        String code = """
+            SCRIPT AREA
+            START SCRIPT
+            DECLARE FLOAT x
+            SCAN: x
+            PRINT: x
+            END SCRIPT
+            """;
+        assertEquals("5.0\n5.0", run(code, List.of("5")));
     }
 
     // Division by zero
