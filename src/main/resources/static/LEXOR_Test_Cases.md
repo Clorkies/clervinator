@@ -234,3 +234,213 @@ SCAN: x, y
 PRINT: x * y
 END SCRIPT
 ```
+
+## Increment 3
+
+#### TC-22 - Simple IF: condition TRUE executes body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=10
+IF (x > 5)
+START IF
+PRINT: "x is greater than 5"
+END IF
+END SCRIPT
+```
+
+#### TC-23 - Simple IF: condition FALSE skips body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=3
+IF (x > 5)
+START IF
+PRINT: "x is greater than 5"
+END IF
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-24 - IF-ELSE: true branch taken
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT score=85
+IF (score >= 75)
+START IF
+PRINT: "PASSED"
+END IF
+ELSE
+START IF
+PRINT: "FAILED"
+END IF
+END SCRIPT
+```
+
+#### TC-25 - IF-ELSE: false branch (else) taken
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT score=60
+IF (score >= 75)
+START IF
+PRINT: "PASSED"
+END IF
+ELSE
+START IF
+PRINT: "FAILED"
+END IF
+END SCRIPT
+```
+
+#### TC-26 - IF ELSE IF ELSE: first branch matches
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT grade=95
+IF (grade >= 90)
+START IF
+PRINT: "Excellent"
+END IF
+ELSE IF (grade >= 75)
+START IF
+PRINT: "Passing"
+END IF
+ELSE
+START IF
+PRINT: "Failing"
+END IF
+END SCRIPT
+```
+
+#### TC-27 - IF ELSE IF ELSE: middle ELSE IF branch matches
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT grade=80
+IF (grade >= 90)
+START IF
+PRINT: "Excellent"
+END IF
+ELSE IF (grade >= 75)
+START IF
+PRINT: "Passing"
+END IF
+ELSE
+START IF
+PRINT: "Failing"
+END IF
+END SCRIPT
+```
+
+#### TC-28 - IF ELSE IF ELSE: ELSE branch taken (no condition matches)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT grade=50
+IF (grade >= 90)
+START IF
+PRINT: "Excellent"
+END IF
+ELSE IF (grade >= 75)
+START IF
+PRINT: "Passing"
+END IF
+ELSE
+START IF
+PRINT: "Failing"
+END IF
+END SCRIPT
+```
+
+#### TC-29 - Nested IF inside IF body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=10
+DECLARE INT y=5
+IF (x > 0)
+START IF
+IF (y > 0)
+START IF
+PRINT: "both positive"
+END IF
+END IF
+END SCRIPT
+```
+
+#### TC-30 - Nested IF-ELSE inside ELSE branch
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT temp=25
+IF (temp > 35)
+START IF
+PRINT: "Hot"
+END IF
+ELSE
+START IF
+IF (temp > 20)
+START IF
+PRINT: "Warm"
+END IF
+ELSE
+START IF
+PRINT: "Cold"
+END IF
+END IF
+END SCRIPT
+```
+
+#### TC-31 - Error: DECLARE inside IF block (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE BOOL flag="TRUE"
+IF (flag)
+START IF
+DECLARE INT x=1
+END IF
+END SCRIPT
+```
+
+#### TC-32 - Error: INT used as condition (runtime type error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=5
+IF (x)
+START IF
+PRINT: "bad"
+END IF
+END SCRIPT
+```
+
+#### TC-33 - Error: missing END IF (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE BOOL flag="TRUE"
+IF (flag)
+START IF
+PRINT: "oops"
+END SCRIPT
+```
+
+#### TC-34 - Lazy evaluation: runtime error in unchosen branch is ignored
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=10, z=0
+DECLARE BOOL t="TRUE"
+IF (t)
+START IF
+PRINT: "safe"
+END IF
+ELSE
+START IF
+PRINT: x/z
+END IF
+END SCRIPT
+```

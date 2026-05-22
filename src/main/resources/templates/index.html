@@ -1577,12 +1577,12 @@ END SCRIPT
                 const increment = Number(this.getAttribute('data-increment'));
                 if (!increment) return;
 
-                if (increment === 1 || increment === 2) {
+                if (increment === 1 || increment === 2 || increment === 3) {
                     await openTcPicker(increment, this);
                     return;
                 }
 
-                // Increments 3-4: placeholder
+                // Increment 4+: placeholder
                 closeTcPicker();
                 this.classList.add('is-active');
                 setTimeout(() => this.classList.remove('is-active'), 600);
