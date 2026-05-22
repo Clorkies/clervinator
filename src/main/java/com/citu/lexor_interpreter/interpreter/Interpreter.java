@@ -46,6 +46,29 @@ public class Interpreter {
             executePrint(node);
         } else if (statement instanceof ScanNode node) {
             executeScan(node);
+        } else if (statement instanceof IfNode node) {
+            executeIf(node);
+        }
+    }
+
+    // IF / ELSE IF / ELSE
+    private void executeIf(IfNode node) {
+        for (IfNode.Branch branch : node.branches()) {
+            Object cond = evaluate(branch.condition());
+            if (!(cond instanceof Boolean)) {
+                throw new ParserException("ConditionError: IF condition must evaluate to BOOL, got " + cond.getClass().getSimpleName());
+            }
+            if ((Boolean) cond) {
+                for (StatementNode s : branch.body()) {
+                    execute(s);
+                }
+                return;
+            }
+        }
+        if (node.elseBranch() != null) {
+            for (StatementNode s : node.elseBranch()) {
+                execute(s);
+            }
         }
     }
 
