@@ -444,3 +444,185 @@ PRINT: x/z
 END IF
 END SCRIPT
 ```
+
+## Increment 4
+
+#### TC-35 - Basic FOR count-up (Happy Path)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<4, i=i+1)
+START FOR
+PRINT: i & $
+END FOR
+END SCRIPT
+```
+
+#### TC-36 - FOR accumulate sum
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i, total
+total=0
+FOR (i=1, i<6, i=i+1)
+START FOR
+total=total+i
+END FOR
+PRINT: total
+END SCRIPT
+```
+
+#### TC-37 - FOR zero-iteration
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=10, i<5, i=i+1)
+START FOR
+PRINT: i
+END FOR
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-38 - FOR loop with multiplication in update
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<100, i=i*2)
+START FOR
+PRINT: i & $
+END FOR
+END SCRIPT
+```
+
+#### TC-39 - Basic REPEAT WHEN count-up
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+i=1
+REPEAT WHEN (i<4)
+START REPEAT
+PRINT: i & $
+i=i+1
+END REPEAT
+END SCRIPT
+```
+
+#### TC-40 - REPEAT WHEN zero-iteration
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+i=10
+REPEAT WHEN (i<5)
+START REPEAT
+PRINT: i
+END REPEAT
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-41 - REPEAT WHEN with BOOL variable condition
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT count
+DECLARE BOOL running
+count=0
+running="TRUE"
+REPEAT WHEN (running)
+START REPEAT
+count=count+1
+running=(count<3)
+END REPEAT
+PRINT: count
+END SCRIPT
+```
+
+#### TC-42 - Nested FOR inside FOR
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i, j, prod
+FOR (i=1, i<4, i=i+1)
+START FOR
+FOR (j=1, j<4, j=j+1)
+START FOR
+prod=i*j
+PRINT: prod & " "
+END FOR
+PRINT: $
+END FOR
+END SCRIPT
+```
+
+#### TC-43 - Nested REPEAT WHEN inside FOR
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i, j
+FOR (i=1, i<3, i=i+1)
+START FOR
+j=1
+REPEAT WHEN (j<3)
+START REPEAT
+PRINT: i & "x" & j & $
+j=j+1
+END REPEAT
+END FOR
+END SCRIPT
+```
+
+#### TC-44 - IF inside FOR body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<6, i=i+1)
+START FOR
+IF (i==3)
+START IF
+PRINT: "three" & $
+END IF
+END FOR
+END SCRIPT
+```
+
+#### TC-45 - Error: DECLARE inside FOR body (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<3, i=i+1)
+START FOR
+DECLARE INT x
+END FOR
+END SCRIPT
+```
+
+#### TC-46 - Error: non-BOOL condition in FOR (runtime error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i+1, i=i+1)
+START FOR
+PRINT: i
+END FOR
+END SCRIPT
+```
+
+#### TC-47 - Error: missing END FOR (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<3, i=i+1)
+START FOR
+PRINT: i
+END SCRIPT
+```
