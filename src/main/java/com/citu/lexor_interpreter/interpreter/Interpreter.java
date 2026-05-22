@@ -48,6 +48,10 @@ public class Interpreter {
             executeScan(node);
         } else if (statement instanceof IfNode node) {
             executeIf(node);
+        } else if (statement instanceof ForLoopNode node) {
+            executeFor(node);
+        } else if (statement instanceof RepeatLoopNode node) {
+            executeRepeat(node);
         }
     }
 
@@ -67,6 +71,46 @@ public class Interpreter {
         }
         if (node.elseBranch() != null) {
             for (StatementNode s : node.elseBranch()) {
+                execute(s);
+            }
+        }
+    }
+
+    // FOR LOOP
+    private static final int MAX_ITERATIONS = 100_000;
+
+    private void executeFor(ForLoopNode node) {
+        executeAssign(node.initialization());
+        int guard = 0;
+        while (true) {
+            Object cond = evaluate(node.condition());
+            if (!(cond instanceof Boolean)) {
+                throw new ParserException("ConditionError: FOR condition must evaluate to BOOL, got " + cond.getClass().getSimpleName());
+            }
+            if (!(Boolean) cond) break;
+            if (++guard > MAX_ITERATIONS) {
+                throw new ParserException("RuntimeError: FOR loop exceeded maximum iteration limit");
+            }
+            for (StatementNode s : node.body()) {
+                execute(s);
+            }
+            executeAssign(node.update());
+        }
+    }
+
+    // REPEAT WHEN LOOP
+    private void executeRepeat(RepeatLoopNode node) {
+        int guard = 0;
+        while (true) {
+            Object cond = evaluate(node.condition());
+            if (!(cond instanceof Boolean)) {
+                throw new ParserException("ConditionError: REPEAT WHEN condition must evaluate to BOOL, got " + cond.getClass().getSimpleName());
+            }
+            if (!(Boolean) cond) break;
+            if (++guard > MAX_ITERATIONS) {
+                throw new ParserException("RuntimeError: REPEAT loop exceeded maximum iteration limit");
+            }
+            for (StatementNode s : node.body()) {
                 execute(s);
             }
         }
