@@ -234,3 +234,395 @@ SCAN: x, y
 PRINT: x * y
 END SCRIPT
 ```
+
+## Increment 3
+
+#### TC-22 - Simple IF: condition TRUE executes body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=10
+IF (x > 5)
+START IF
+PRINT: "x is greater than 5"
+END IF
+END SCRIPT
+```
+
+#### TC-23 - Simple IF: condition FALSE skips body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=3
+IF (x > 5)
+START IF
+PRINT: "x is greater than 5"
+END IF
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-24 - IF-ELSE: true branch taken
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT score=85
+IF (score >= 75)
+START IF
+PRINT: "PASSED"
+END IF
+ELSE
+START IF
+PRINT: "FAILED"
+END IF
+END SCRIPT
+```
+
+#### TC-25 - IF-ELSE: false branch (else) taken
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT score=60
+IF (score >= 75)
+START IF
+PRINT: "PASSED"
+END IF
+ELSE
+START IF
+PRINT: "FAILED"
+END IF
+END SCRIPT
+```
+
+#### TC-26 - IF ELSE IF ELSE: first branch matches
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT grade=95
+IF (grade >= 90)
+START IF
+PRINT: "Excellent"
+END IF
+ELSE IF (grade >= 75)
+START IF
+PRINT: "Passing"
+END IF
+ELSE
+START IF
+PRINT: "Failing"
+END IF
+END SCRIPT
+```
+
+#### TC-27 - IF ELSE IF ELSE: middle ELSE IF branch matches
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT grade=80
+IF (grade >= 90)
+START IF
+PRINT: "Excellent"
+END IF
+ELSE IF (grade >= 75)
+START IF
+PRINT: "Passing"
+END IF
+ELSE
+START IF
+PRINT: "Failing"
+END IF
+END SCRIPT
+```
+
+#### TC-28 - IF ELSE IF ELSE: ELSE branch taken (no condition matches)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT grade=50
+IF (grade >= 90)
+START IF
+PRINT: "Excellent"
+END IF
+ELSE IF (grade >= 75)
+START IF
+PRINT: "Passing"
+END IF
+ELSE
+START IF
+PRINT: "Failing"
+END IF
+END SCRIPT
+```
+
+#### TC-29 - Nested IF inside IF body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=10
+DECLARE INT y=5
+IF (x > 0)
+START IF
+IF (y > 0)
+START IF
+PRINT: "both positive"
+END IF
+END IF
+END SCRIPT
+```
+
+#### TC-30 - Nested IF-ELSE inside ELSE branch
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT temp=25
+IF (temp > 35)
+START IF
+PRINT: "Hot"
+END IF
+ELSE
+START IF
+IF (temp > 20)
+START IF
+PRINT: "Warm"
+END IF
+ELSE
+START IF
+PRINT: "Cold"
+END IF
+END IF
+END SCRIPT
+```
+
+#### TC-31 - Error: DECLARE inside IF block (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE BOOL flag="TRUE"
+IF (flag)
+START IF
+DECLARE INT x=1
+END IF
+END SCRIPT
+```
+
+#### TC-32 - Error: INT used as condition (runtime type error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=5
+IF (x)
+START IF
+PRINT: "bad"
+END IF
+END SCRIPT
+```
+
+#### TC-33 - Error: missing END IF (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE BOOL flag="TRUE"
+IF (flag)
+START IF
+PRINT: "oops"
+END SCRIPT
+```
+
+#### TC-34 - Lazy evaluation: runtime error in unchosen branch is ignored
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=10, z=0
+DECLARE BOOL t="TRUE"
+IF (t)
+START IF
+PRINT: "safe"
+END IF
+ELSE
+START IF
+PRINT: x/z
+END IF
+END SCRIPT
+```
+
+## Increment 4
+
+#### TC-35 - Basic FOR count-up (Happy Path)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<4, i=i+1)
+START FOR
+PRINT: i & $
+END FOR
+END SCRIPT
+```
+
+#### TC-36 - FOR accumulate sum
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i, total
+total=0
+FOR (i=1, i<6, i=i+1)
+START FOR
+total=total+i
+END FOR
+PRINT: total
+END SCRIPT
+```
+
+#### TC-37 - FOR zero-iteration
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=10, i<5, i=i+1)
+START FOR
+PRINT: i
+END FOR
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-38 - FOR loop with multiplication in update
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<100, i=i*2)
+START FOR
+PRINT: i & $
+END FOR
+END SCRIPT
+```
+
+#### TC-39 - Basic REPEAT WHEN count-up
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+i=1
+REPEAT WHEN (i<4)
+START REPEAT
+PRINT: i & $
+i=i+1
+END REPEAT
+END SCRIPT
+```
+
+#### TC-40 - REPEAT WHEN zero-iteration
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+i=10
+REPEAT WHEN (i<5)
+START REPEAT
+PRINT: i
+END REPEAT
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-41 - REPEAT WHEN with BOOL variable condition
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT count
+DECLARE BOOL running
+count=0
+running="TRUE"
+REPEAT WHEN (running)
+START REPEAT
+count=count+1
+running=(count<3)
+END REPEAT
+PRINT: count
+END SCRIPT
+```
+
+#### TC-42 - Nested FOR inside FOR
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i, j, prod
+FOR (i=1, i<4, i=i+1)
+START FOR
+FOR (j=1, j<4, j=j+1)
+START FOR
+prod=i*j
+PRINT: prod & " "
+END FOR
+PRINT: $
+END FOR
+END SCRIPT
+```
+
+#### TC-43 - Nested REPEAT WHEN inside FOR
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i, j
+FOR (i=1, i<3, i=i+1)
+START FOR
+j=1
+REPEAT WHEN (j<3)
+START REPEAT
+PRINT: i & "x" & j & $
+j=j+1
+END REPEAT
+END FOR
+END SCRIPT
+```
+
+#### TC-44 - IF inside FOR body
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<6, i=i+1)
+START FOR
+IF (i==3)
+START IF
+PRINT: "three" & $
+END IF
+END FOR
+END SCRIPT
+```
+
+#### TC-45 - Error: DECLARE inside FOR body (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<3, i=i+1)
+START FOR
+DECLARE INT x
+END FOR
+END SCRIPT
+```
+
+#### TC-46 - Error: non-BOOL condition in FOR (runtime error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i+1, i=i+1)
+START FOR
+PRINT: i
+END FOR
+END SCRIPT
+```
+
+#### TC-47 - Error: missing END FOR (parse error)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<3, i=i+1)
+START FOR
+PRINT: i
+END SCRIPT
+```

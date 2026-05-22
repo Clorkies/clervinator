@@ -8,6 +8,9 @@ import com.citu.lexor_interpreter.parser.ast.DeclareNode;
 import com.citu.lexor_interpreter.parser.ast.ExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.PrintNode;
 import com.citu.lexor_interpreter.parser.ast.ScanNode;
+import com.citu.lexor_interpreter.parser.ast.IfNode;
+import com.citu.lexor_interpreter.parser.ast.ForLoopNode;
+import com.citu.lexor_interpreter.parser.ast.RepeatLoopNode;
 import com.citu.lexor_interpreter.parser.ast.StatementNode;
 import com.citu.lexor_interpreter.parser.ast.expression.BinaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.LiteralNode;
@@ -290,6 +293,18 @@ public class Parser {
             throw error("DECLARE statements must appear immediately after START SCRIPT");
         }
 
+        if (check(TokenType.IF)) {
+            return List.of(parseIfStatement());
+        }
+
+        if (check(TokenType.FOR)) {
+            return List.of(parseForStatement());
+        }
+
+        if (check(TokenType.REPEAT)) {
+            return List.of(parseRepeatStatement());
+        }
+
         if (check(TokenType.PRINT)) {
             return List.of(parsePrintStatement());
         }
@@ -303,6 +318,182 @@ public class Parser {
         }
 
         throw error("expected executable statement");
+    }
+
+    // -------------------------------------------------------------------------
+    // Conditional: IF / ELSE IF* / ELSE?
+    // -------------------------------------------------------------------------
+
+    /**
+     * Parses a complete IF / ELSE IF* / ELSE? structure.
+     *
+     * <pre>
+     *   IF (&lt;BOOL expression&gt;)
+     *   START IF
+     *       &lt;statement&gt;...
+     *   END IF
+     *   [ELSE IF (&lt;BOOL expression&gt;)
+     *   START IF
+     *       &lt;statement&gt;...
+     *   END IF]*
+     *   [ELSE
+     *   START IF
+     *       &lt;statement&gt;...
+     *   END IF]
+     * </pre>
+     */
+    private IfNode parseIfStatement() {
+        // -- IF header --
+        consume(TokenType.IF, "expected IF");
+        consume(TokenType.LPAREN, "expected '(' after IF");
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.RPAREN, "expected ')' after IF condition");
+        // START IF must begin on the next line
+        requireNextTokenOnNewLine(previous().position().line(), "IF condition");
+
+        // -- IF body --
+        List<IfNode.Branch> branches = new ArrayList<>();
+        List<StatementNode> body = parseBlock();
+        branches.add(new IfNode.Branch(condition, body));
+        // Whatever follows END IF must be on its own line
+        requireNextTokenOnNewLine(previous().position().line(), "END IF");
+
+        // -- ELSE IF* chain --
+        while (check(TokenType.ELSE_IF)) {
+            consume(TokenType.ELSE_IF, "expected ELSE IF");
+            consume(TokenType.LPAREN, "expected '(' after ELSE IF");
+            ExpressionNode elseIfCondition = parseExpression();
+            consume(TokenType.RPAREN, "expected ')' after ELSE IF condition");
+            requireNextTokenOnNewLine(previous().position().line(), "ELSE IF condition");
+
+            List<StatementNode> elseIfBody = parseBlock();
+            branches.add(new IfNode.Branch(elseIfCondition, elseIfBody));
+            requireNextTokenOnNewLine(previous().position().line(), "END IF");
+        }
+
+        // -- Optional ELSE --
+        List<StatementNode> elseBranch = null;
+        if (check(TokenType.ELSE)) {
+            consume(TokenType.ELSE, "expected ELSE");
+            requireNextTokenOnNewLine(previous().position().line(), "ELSE");
+            elseBranch = parseBlock();
+            // The outer parseProgram()/parseBlock() loop enforces line break after the last END IF
+        }
+
+        return new IfNode(branches, elseBranch);
+    }
+
+    /**
+     * Parses a block delimited by {@code START IF} ... {@code END IF}.
+     * Used for every branch body in an IF structure (IF, ELSE IF, and ELSE
+     * all share identical {@code START IF}/{@code END IF} delimiters per spec).
+     *
+     * <p>Stops early at {@code END_SCRIPT}, {@code ELSE}, or {@code ELSE_IF}
+     * so that a missing {@code END IF} produces a clean diagnostic rather than
+     * cascading into an "expected executable statement" error.
+     */
+    private List<StatementNode> parseBlock() {
+        consume(TokenType.START_IF, "expected START IF to open block");
+        requireNextTokenOnNewLine(previous().position().line(), "START IF");
+
+        List<StatementNode> body = new ArrayList<>();
+
+        while (!check(TokenType.END_IF)
+                && !check(TokenType.END_SCRIPT)
+                && !check(TokenType.ELSE)
+                && !check(TokenType.ELSE_IF)
+                && !isAtEnd()) {
+            int statementLine = peek().position().line();
+            body.addAll(parseStatement());
+            requireNextTokenOnNewLine(statementLine, "statement");
+        }
+
+        consume(TokenType.END_IF, "expected END IF to close block");
+        return body;
+    }
+
+    // -------------------------------------------------------------------------
+    // Loop Control: FOR / REPEAT WHEN
+    // -------------------------------------------------------------------------
+
+    private ForLoopNode parseForStatement() {
+        consume(TokenType.FOR, "expected FOR");
+        consume(TokenType.LPAREN, "expected '(' after FOR");
+
+        if (check(TokenType.DECLARE)) {
+            throw error("DECLARE is not allowed in FOR initialization");
+        }
+        AssignNode initialization = parseInlineAssignment();
+        consume(TokenType.COMMA, "expected ',' after FOR initialization");
+
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.COMMA, "expected ',' after FOR condition");
+
+        if (check(TokenType.DECLARE)) {
+            throw error("DECLARE is not allowed in FOR update");
+        }
+        AssignNode update = parseInlineAssignment();
+
+        consume(TokenType.RPAREN, "expected ')' after FOR update");
+        requireNextTokenOnNewLine(previous().position().line(), "FOR header");
+
+        List<StatementNode> body = parseForBlock();
+        return new ForLoopNode(initialization, condition, update, body);
+    }
+
+    private AssignNode parseInlineAssignment() {
+        Token name = consume(TokenType.IDENTIFIER, "expected variable name on assignment");
+        consume(TokenType.ASSIGN, "expected '=' in assignment");
+        ExpressionNode value = parseExpression();
+        return new AssignNode(name.lexeme(), value);
+    }
+
+    private List<StatementNode> parseForBlock() {
+        consume(TokenType.START_FOR, "expected START FOR to open FOR block");
+        requireNextTokenOnNewLine(previous().position().line(), "START FOR");
+
+        List<StatementNode> body = new ArrayList<>();
+
+        while (!check(TokenType.END_FOR)
+                && !check(TokenType.END_SCRIPT)
+                && !isAtEnd()) {
+            int statementLine = peek().position().line();
+            body.addAll(parseStatement());
+            requireNextTokenOnNewLine(statementLine, "statement");
+        }
+
+        consume(TokenType.END_FOR, "expected END FOR to close FOR block");
+        return body;
+    }
+
+    private RepeatLoopNode parseRepeatStatement() {
+        consume(TokenType.REPEAT, "expected REPEAT");
+        consume(TokenType.WHEN, "expected WHEN after REPEAT");
+        consume(TokenType.LPAREN, "expected '(' after REPEAT WHEN");
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.RPAREN, "expected ')' after REPEAT WHEN condition");
+        requireNextTokenOnNewLine(previous().position().line(), "REPEAT WHEN header");
+
+        List<StatementNode> body = parseRepeatBlock();
+        return new RepeatLoopNode(condition, body);
+    }
+
+    private List<StatementNode> parseRepeatBlock() {
+        consume(TokenType.START_REPEAT, "expected START REPEAT to open REPEAT block");
+        requireNextTokenOnNewLine(previous().position().line(), "START REPEAT");
+
+        List<StatementNode> body = new ArrayList<>();
+
+        while (!check(TokenType.END_REPEAT)
+                && !check(TokenType.END_SCRIPT)
+                && !isAtEnd()) {
+            int statementLine = peek().position().line();
+            body.addAll(parseStatement());
+            requireNextTokenOnNewLine(statementLine, "statement");
+        }
+
+        consume(TokenType.END_REPEAT, "expected END REPEAT to close REPEAT block");
+        return body;
     }
 
     public Parser(List<Token> tokens) {
