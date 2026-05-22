@@ -9,6 +9,8 @@ import com.citu.lexor_interpreter.parser.ast.ExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.PrintNode;
 import com.citu.lexor_interpreter.parser.ast.ScanNode;
 import com.citu.lexor_interpreter.parser.ast.IfNode;
+import com.citu.lexor_interpreter.parser.ast.ForLoopNode;
+import com.citu.lexor_interpreter.parser.ast.RepeatLoopNode;
 import com.citu.lexor_interpreter.parser.ast.StatementNode;
 import com.citu.lexor_interpreter.parser.ast.expression.BinaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.LiteralNode;
@@ -295,6 +297,14 @@ public class Parser {
             return List.of(parseIfStatement());
         }
 
+        if (check(TokenType.FOR)) {
+            return List.of(parseForStatement());
+        }
+
+        if (check(TokenType.REPEAT)) {
+            return List.of(parseRepeatStatement());
+        }
+
         if (check(TokenType.PRINT)) {
             return List.of(parsePrintStatement());
         }
@@ -399,6 +409,90 @@ public class Parser {
         }
 
         consume(TokenType.END_IF, "expected END IF to close block");
+        return body;
+    }
+
+    // -------------------------------------------------------------------------
+    // Loop Control: FOR / REPEAT WHEN
+    // -------------------------------------------------------------------------
+
+    private ForLoopNode parseForStatement() {
+        consume(TokenType.FOR, "expected FOR");
+        consume(TokenType.LPAREN, "expected '(' after FOR");
+
+        if (check(TokenType.DECLARE)) {
+            throw error("DECLARE is not allowed in FOR initialization");
+        }
+        AssignNode initialization = parseInlineAssignment();
+        consume(TokenType.COMMA, "expected ',' after FOR initialization");
+
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.COMMA, "expected ',' after FOR condition");
+
+        if (check(TokenType.DECLARE)) {
+            throw error("DECLARE is not allowed in FOR update");
+        }
+        AssignNode update = parseInlineAssignment();
+
+        consume(TokenType.RPAREN, "expected ')' after FOR update");
+        requireNextTokenOnNewLine(previous().position().line(), "FOR header");
+
+        List<StatementNode> body = parseForBlock();
+        return new ForLoopNode(initialization, condition, update, body);
+    }
+
+    private AssignNode parseInlineAssignment() {
+        Token name = consume(TokenType.IDENTIFIER, "expected variable name on assignment");
+        consume(TokenType.ASSIGN, "expected '=' in assignment");
+        ExpressionNode value = parseExpression();
+        return new AssignNode(name.lexeme(), value);
+    }
+
+    private List<StatementNode> parseForBlock() {
+        consume(TokenType.START_FOR, "expected START FOR to open FOR block");
+        requireNextTokenOnNewLine(previous().position().line(), "START FOR");
+
+        List<StatementNode> body = new ArrayList<>();
+
+        while (!check(TokenType.END_FOR)
+                && !check(TokenType.END_SCRIPT)
+                && !isAtEnd()) {
+            int statementLine = peek().position().line();
+            body.addAll(parseStatement());
+            requireNextTokenOnNewLine(statementLine, "statement");
+        }
+
+        consume(TokenType.END_FOR, "expected END FOR to close FOR block");
+        return body;
+    }
+
+    private RepeatLoopNode parseRepeatStatement() {
+        consume(TokenType.REPEAT, "expected REPEAT");
+        consume(TokenType.WHEN, "expected WHEN after REPEAT");
+        consume(TokenType.LPAREN, "expected '(' after REPEAT WHEN");
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.RPAREN, "expected ')' after REPEAT WHEN condition");
+        requireNextTokenOnNewLine(previous().position().line(), "REPEAT WHEN header");
+
+        List<StatementNode> body = parseRepeatBlock();
+        return new RepeatLoopNode(condition, body);
+    }
+
+    private List<StatementNode> parseRepeatBlock() {
+        consume(TokenType.START_REPEAT, "expected START REPEAT to open REPEAT block");
+        requireNextTokenOnNewLine(previous().position().line(), "START REPEAT");
+
+        List<StatementNode> body = new ArrayList<>();
+
+        while (!check(TokenType.END_REPEAT)
+                && !check(TokenType.END_SCRIPT)
+                && !isAtEnd()) {
+            int statementLine = peek().position().line();
+            body.addAll(parseStatement());
+            requireNextTokenOnNewLine(statementLine, "statement");
+        }
+
+        consume(TokenType.END_REPEAT, "expected END REPEAT to close REPEAT block");
         return body;
     }
 
