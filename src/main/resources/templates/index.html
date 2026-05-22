@@ -1828,10 +1828,89 @@ END SCRIPT
             paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }
         });
         require(['vs/editor/editor.main'], function () {
+            // Register Lexor language
+            monaco.languages.register({ id: 'lexor' });
+            monaco.languages.setMonarchTokensProvider('lexor', {
+                ignoreCase: false,
+                keywords: [
+                    'DECLARE', 'INT', 'CHAR', 'BOOL', 'FLOAT',
+                    'PRINT', 'SCAN', 'IF', 'ELSE', 'FOR', 'REPEAT', 'WHEN',
+                    'AND', 'OR', 'NOT', 'TRUE', 'FALSE'
+                ],
+                operators: [
+                    '=', '>', '<', '==', '<=', '>=', '<>',
+                    '+', '-', '*', '/', '%', '&'
+                ],
+                symbols:  /[=><!~?:&|+\-*\/\^%]+/,
+                escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+                tokenizer: {
+                    root: [
+                        // Multi-word keywords
+                        [/SCRIPT AREA\b/, 'keyword'],
+                        [/START SCRIPT\b/, 'keyword'],
+                        [/END SCRIPT\b/, 'keyword'],
+                        [/START IF\b/, 'keyword'],
+                        [/END IF\b/, 'keyword'],
+                        [/ELSE IF\b/, 'keyword'],
+                        [/START FOR\b/, 'keyword'],
+                        [/END FOR\b/, 'keyword'],
+                        [/REPEAT WHEN\b/, 'keyword'],
+                        [/START REPEAT\b/, 'keyword'],
+                        [/END REPEAT\b/, 'keyword'],
+
+                        // Single word identifiers/keywords
+                        [/[a-zA-Z_]\w*/, {
+                            cases: {
+                                '@keywords': 'keyword',
+                                '@default': 'identifier'
+                            }
+                        }],
+                        { include: '@whitespace' },
+                        [/[{}()\[\]]/, '@brackets'],
+                        [/@symbols/, { cases: { '@operators': 'operator', '@default': '' } }],
+                        [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
+                        [/\d+/, 'number'],
+                        [/[;,.]/, 'delimiter'],
+                        [/"([^"\\]|\\.)*$/, 'string.invalid' ],
+                        [/"/,  { token: 'string.quote', bracket: '@open', next: '@string' } ],
+                        [/'[^\\']'/, 'string'],
+                        [/(')(@escapes)(')/, ['string','string.escape','string']],
+                        [/'/, 'string.invalid']
+                    ],
+                    string: [
+                        [/[^\\"]+/,  'string'],
+                        [/@escapes/, 'string.escape'],
+                        [/\\./,      'string.escape.invalid'],
+                        [/"/,        { token: 'string.quote', bracket: '@close', next: '@pop' } ]
+                    ],
+                    whitespace: [
+                        [/[ \t\r\n]+/, 'white'],
+                        [/%%.*$/,    'comment'],
+                    ],
+                },
+            });
+
+            // Define custom theme mimicking modern IDE (e.g. One Dark Pro style)
+            monaco.editor.defineTheme('lexorTheme', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { token: 'keyword', foreground: 'C678DD', fontStyle: 'bold' },
+                    { token: 'identifier', foreground: 'E06C75' },
+                    { token: 'string', foreground: '98C379' },
+                    { token: 'number', foreground: 'D19A66' },
+                    { token: 'comment', foreground: '5C6370', fontStyle: 'italic' },
+                    { token: 'operator', foreground: '56B6C2' },
+                ],
+                colors: {
+                    'editor.background': '#1e1e1e',
+                }
+            });
+
             editor = monaco.editor.create(document.getElementById('lexor-editor'), {
                 value: SAMPLES.empty.code,
-                language: 'plaintext',
-                theme: 'vs-dark',
+                language: 'lexor',
+                theme: 'lexorTheme',
                 automaticLayout: true,
                 fontSize: 14,
                 minimap: { enabled: false },
