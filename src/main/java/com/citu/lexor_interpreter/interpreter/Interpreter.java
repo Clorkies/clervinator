@@ -265,7 +265,7 @@ public class Interpreter {
             default -> throw new ParserException("Unknown arithmetic operator");
         };
 
-        if (useDouble) return result;
+        if (useDouble) return Math.round(result * 100.0) / 100.0;
         return (int) result;
     }
 
