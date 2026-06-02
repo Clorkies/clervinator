@@ -626,3 +626,380 @@ START FOR
 PRINT: i
 END SCRIPT
 ```
+
+## Increment 5
+
+#### TC-48 - Basic SWITCH with INT match (Happy Path)
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=2
+SWITCH (x)
+START SWITCH
+CASE 1:
+PRINT: "one"
+CASE 2:
+PRINT: "two"
+DEFAULT:
+PRINT: "other"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-49 - Basic SWITCH with DEFAULT taken
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=99
+SWITCH (x)
+START SWITCH
+CASE 1:
+PRINT: "one"
+CASE 2:
+PRINT: "two"
+DEFAULT:
+PRINT: "other"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-50 - SWITCH with no match and no DEFAULT
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=5
+SWITCH (x)
+START SWITCH
+CASE 1:
+PRINT: "one"
+CASE 2:
+PRINT: "two"
+END SWITCH
+PRINT: "done"
+END SCRIPT
+```
+
+#### TC-51 - SWITCH with STRING matching
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE BOOL x="TRUE"
+SWITCH (x)
+START SWITCH
+CASE "FALSE":
+PRINT: "F"
+CASE "TRUE":
+PRINT: "T"
+DEFAULT:
+PRINT: "U"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-52 - SWITCH with CHAR matching
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE CHAR grade='B'
+SWITCH (grade)
+START SWITCH
+CASE 'A':
+PRINT: "Excellent"
+CASE 'B':
+PRINT: "Good"
+DEFAULT:
+PRINT: "Unknown"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-53 - SWITCH with BOOL matching
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE BOOL active="TRUE"
+SWITCH (active)
+START SWITCH
+CASE "TRUE":
+PRINT: "Running"
+CASE "FALSE":
+PRINT: "Stopped"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-54 - SWITCH with FLOAT matching
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE FLOAT pi=3.14
+SWITCH (pi)
+START SWITCH
+CASE 3.14:
+PRINT: "Pi"
+CASE 2.71:
+PRINT: "E"
+DEFAULT:
+PRINT: "Other"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-55 - SWITCH with expression in CASE
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=5
+SWITCH (x)
+START SWITCH
+CASE 2+3:
+PRINT: "Five"
+CASE 1+1:
+PRINT: "Two"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-56 - Nested SWITCH inside SWITCH
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT outer=1, inner=2
+SWITCH (outer)
+START SWITCH
+CASE 1:
+SWITCH (inner)
+START SWITCH
+CASE 2:
+PRINT: "1 and 2"
+DEFAULT:
+PRINT: "1 and other"
+END SWITCH
+DEFAULT:
+PRINT: "outer is not 1"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-57 - SWITCH inside IF statement
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+IF (x > 0)
+START IF
+SWITCH (x)
+START SWITCH
+CASE 1:
+PRINT: "Positive 1"
+DEFAULT:
+PRINT: "Positive other"
+END SWITCH
+END IF
+END SCRIPT
+```
+
+#### TC-58 - IF statement inside SWITCH CASE
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1, y=10
+SWITCH (x)
+START SWITCH
+CASE 1:
+IF (y > 5)
+START IF
+PRINT: "x is 1 and y > 5"
+END IF
+DEFAULT:
+PRINT: "Default"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-59 - SWITCH inside FOR loop
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i
+FOR (i=1, i<=3, i=i+1)
+START FOR
+SWITCH (i)
+START SWITCH
+CASE 1:
+PRINT: "One" & $
+CASE 2:
+PRINT: "Two" & $
+CASE 3:
+PRINT: "Three" & $
+END SWITCH
+END FOR
+END SCRIPT
+```
+
+#### TC-60 - SWITCH inside REPEAT WHEN loop
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT i=1
+REPEAT WHEN (i <= 2)
+START REPEAT
+SWITCH (i)
+START SWITCH
+CASE 1:
+PRINT: "A" & $
+CASE 2:
+PRINT: "B" & $
+END SWITCH
+i=i+1
+END REPEAT
+END SCRIPT
+```
+
+#### TC-61 - Error: Parse Error on duplicate DEFAULT
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+SWITCH (x)
+START SWITCH
+DEFAULT:
+PRINT: "First"
+DEFAULT:
+PRINT: "Second"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-62 - Error: Parse Error on missing END SWITCH
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+SWITCH (x)
+START SWITCH
+CASE 1:
+PRINT: "One"
+END SCRIPT
+```
+
+#### TC-63 - Error: Parse Error on missing START SWITCH
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+SWITCH (x)
+CASE 1:
+PRINT: "One"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-64 - Error: Parse Error on missing COLON after CASE
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+SWITCH (x)
+START SWITCH
+CASE 1
+PRINT: "One"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-65 - Error: Parse Error on statement outside CASE or DEFAULT
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+SWITCH (x)
+START SWITCH
+PRINT: "I am lost"
+CASE 1:
+PRINT: "One"
+END SWITCH
+END SCRIPT
+```
+
+#### TC-66 - Valid Empty SWITCH
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT x=1
+SWITCH (x)
+START SWITCH
+END SWITCH
+PRINT: "Empty switch parsed successfully"
+END SCRIPT
+```
+
+#### TC-67 - The Gauntlet: Deep Nesting, Dynamic Cases, and State Mutation
+```lexor
+SCRIPT AREA
+START SCRIPT
+
+DECLARE INT val
+DECLARE INT i
+DECLARE BOOL flag="FALSE"
+
+PRINT: "Guess the magic number!" & $ & "Enter a number: "
+SCAN: val
+PRINT: $
+
+IF (val == 67)
+START IF
+
+FOR (i=1, i<=3, i=i+1)
+START FOR
+
+    SWITCH (i)
+    START SWITCH
+
+        CASE 1:
+            PRINT: "One" & $
+
+        CASE 2:
+            IF (NOT flag)
+            START IF
+                PRINT: "Flag false" & $
+                flag="TRUE"
+            END IF
+
+        DEFAULT:
+            SWITCH (flag)
+            START SWITCH
+                CASE "TRUE":
+                    PRINT: "Nested true" & $
+                CASE "FALSE":
+                    PRINT: "Nested false" & $
+            END SWITCH
+
+    END SWITCH
+
+END FOR
+
+END IF
+
+ELSE IF (val > 100)
+START IF
+PRINT: "That is way too high!" & $
+END IF
+
+ELSE IF (val >= 70)
+START IF
+PRINT: "Almost there! Just a little over the top" & $
+END IF
+
+ELSE IF (val > 1)
+START IF
+PRINT: "Shucks! Maybe try something bigger" & $
+END IF
+
+ELSE
+START IF
+PRINT: "Nothing interesting." & $
+END IF
+
+END SCRIPT
+```
