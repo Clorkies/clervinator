@@ -52,6 +52,8 @@ public class Interpreter {
             executeFor(node);
         } else if (statement instanceof RepeatLoopNode node) {
             executeRepeat(node);
+        } else if (statement instanceof SwitchNode node) {
+            executeSwitch(node);
         }
     }
 
@@ -111,6 +113,31 @@ public class Interpreter {
                 throw new ParserException("RuntimeError: REPEAT loop exceeded maximum iteration limit");
             }
             for (StatementNode s : node.body()) {
+                execute(s);
+            }
+        }
+    }
+
+    // SWITCH
+    private void executeSwitch(SwitchNode node) {
+        Object switchValue = evaluate(node.condition());
+        boolean matched = false;
+
+        for (SwitchNode.CaseBranch branch : node.cases()) {
+            Object caseValue = evaluate(branch.matchExpression());
+            
+            // Use equals() to match strings, numbers, booleans, and chars appropriately
+            if (switchValue != null && switchValue.equals(caseValue)) {
+                matched = true;
+                for (StatementNode s : branch.body()) {
+                    execute(s);
+                }
+                break; // No fallthrough
+            }
+        }
+
+        if (!matched && node.defaultBranch() != null) {
+            for (StatementNode s : node.defaultBranch()) {
                 execute(s);
             }
         }
