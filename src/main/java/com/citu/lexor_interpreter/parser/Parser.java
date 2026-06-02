@@ -12,6 +12,7 @@ import com.citu.lexor_interpreter.parser.ast.IfNode;
 import com.citu.lexor_interpreter.parser.ast.ForLoopNode;
 import com.citu.lexor_interpreter.parser.ast.RepeatLoopNode;
 import com.citu.lexor_interpreter.parser.ast.StatementNode;
+import com.citu.lexor_interpreter.parser.ast.SwitchNode;
 import com.citu.lexor_interpreter.parser.ast.expression.BinaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.LiteralNode;
 import com.citu.lexor_interpreter.parser.ast.expression.NewlineNode;
@@ -305,6 +306,10 @@ public class Parser {
             return List.of(parseRepeatStatement());
         }
 
+        if (check(TokenType.SWITCH)) {
+            return List.of(parseSwitchStatement());
+        }
+
         if (check(TokenType.PRINT)) {
             return List.of(parsePrintStatement());
         }
@@ -410,6 +415,62 @@ public class Parser {
 
         consume(TokenType.END_IF, "expected END IF to close block");
         return body;
+    }
+
+    // -------------------------------------------------------------------------
+    // Conditional: SWITCH
+    // -------------------------------------------------------------------------
+
+    private SwitchNode parseSwitchStatement() {
+        // -- SWITCH header --
+        consume(TokenType.SWITCH, "expected SWITCH");
+        consume(TokenType.LPAREN, "expected '(' after SWITCH");
+        ExpressionNode condition = parseExpression();
+        consume(TokenType.RPAREN, "expected ')' after SWITCH condition");
+        requireNextTokenOnNewLine(previous().position().line(), "SWITCH condition");
+
+        consume(TokenType.START_SWITCH, "expected START SWITCH");
+        requireNextTokenOnNewLine(previous().position().line(), "START SWITCH");
+
+        List<SwitchNode.CaseBranch> cases = new ArrayList<>();
+        List<StatementNode> defaultBranch = null;
+
+        // -- Parse block content (Cases and Default) --
+        while (!check(TokenType.END_SWITCH) && !isAtEnd()) {
+            if (check(TokenType.CASE)) {
+                consume(TokenType.CASE, "expected CASE");
+                ExpressionNode matchExpression = parseExpression();
+                consume(TokenType.COLON, "expected ':' after CASE expression");
+                requireNextTokenOnNewLine(previous().position().line(), "CASE");
+                
+                // Parse statements until the next CASE, DEFAULT, or END SWITCH
+                List<StatementNode> body = new ArrayList<>();
+                while (!check(TokenType.CASE) && !check(TokenType.DEFAULT) && !check(TokenType.END_SWITCH) && !isAtEnd()) {
+                    body.addAll(parseStatement());
+                }
+                cases.add(new SwitchNode.CaseBranch(matchExpression, body));
+            } else if (check(TokenType.DEFAULT)) {
+                if (defaultBranch != null) {
+                    throw error("duplicate DEFAULT case in SWITCH");
+                }
+                consume(TokenType.DEFAULT, "expected DEFAULT");
+                consume(TokenType.COLON, "expected ':' after DEFAULT");
+                requireNextTokenOnNewLine(previous().position().line(), "DEFAULT");
+
+                // Parse statements until END SWITCH or another CASE/DEFAULT
+                defaultBranch = new ArrayList<>();
+                while (!check(TokenType.CASE) && !check(TokenType.DEFAULT) && !check(TokenType.END_SWITCH) && !isAtEnd()) {
+                    defaultBranch.addAll(parseStatement());
+                }
+            } else {
+                throw error("expected CASE, DEFAULT, or END SWITCH inside START SWITCH");
+            }
+        }
+
+        consume(TokenType.END_SWITCH, "expected END SWITCH");
+        requireNextTokenOnNewLine(previous().position().line(), "END SWITCH");
+
+        return new SwitchNode(condition, cases, defaultBranch);
     }
 
     // -------------------------------------------------------------------------
