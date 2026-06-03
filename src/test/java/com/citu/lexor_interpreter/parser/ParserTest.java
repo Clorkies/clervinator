@@ -11,7 +11,13 @@ import com.citu.lexor_interpreter.parser.ast.ProgramNode;
 import com.citu.lexor_interpreter.lexer.token.TokenType;
 import com.citu.lexor_interpreter.parser.ast.DeclareNode;
 import com.citu.lexor_interpreter.parser.ast.PrintNode;
+import com.citu.lexor_interpreter.parser.ast.AssignNode;
+import com.citu.lexor_interpreter.parser.ast.IndexAssignNode;
 import com.citu.lexor_interpreter.parser.ast.expression.VariableNode;
+import com.citu.lexor_interpreter.parser.ast.expression.LiteralNode;
+import com.citu.lexor_interpreter.parser.ast.expression.IndexNode;
+import com.citu.lexor_interpreter.parser.ast.expression.LengthNode;
+import com.citu.lexor_interpreter.parser.ast.expression.BinaryExpressionNode;
 
 class ParserTest {
     
@@ -281,6 +287,123 @@ class ParserTest {
         assertEquals(1, print.expressions().size());
         assertTrue(print.expressions().get(0) instanceof VariableNode);
         assertEquals("print", ((VariableNode) print.expressions().get(0)).name());
+    }
+
+    @Test
+    void parse_arrayDeclaration_returnsDeclarationWithSize() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT nums@5
+                END SCRIPT
+            """;
+
+        ProgramNode program = parseProgram(source);
+
+        assertEquals(1, program.statements().size());
+        assertTrue(program.statements().get(0) instanceof DeclareNode);
+
+        DeclareNode declare = (DeclareNode) program.statements().get(0);
+        assertEquals(TokenType.INT_TYPE, declare.type());
+        assertEquals(1, declare.declarations().size());
+
+        DeclareNode.Declaration decl = declare.declarations().get(0);
+        assertEquals("nums", decl.name());
+        assertEquals(Integer.valueOf(5), decl.arraySize());
+        assertEquals(null, decl.initializer());
+    }
+
+    @Test
+    void parse_indexRead_returnsIndexNode() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT nums@5, x
+                x = nums@2
+                END SCRIPT
+            """;
+
+        ProgramNode program = parseProgram(source);
+
+        assertEquals(2, program.statements().size());
+        assertTrue(program.statements().get(1) instanceof AssignNode);
+
+        AssignNode assign = (AssignNode) program.statements().get(1);
+        assertEquals("x", assign.variableName());
+        assertTrue(assign.value() instanceof IndexNode);
+
+        IndexNode index = (IndexNode) assign.value();
+        assertEquals("nums", index.arrayName());
+        assertTrue(index.index() instanceof LiteralNode);
+        assertEquals(Integer.valueOf(2), ((LiteralNode) index.index()).value());
+    }
+
+    @Test
+    void parse_indexWrite_returnsIndexAssignNode() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT nums@5
+                nums@1 = 10
+                END SCRIPT
+            """;
+
+        ProgramNode program = parseProgram(source);
+
+        assertEquals(2, program.statements().size());
+        assertTrue(program.statements().get(1) instanceof IndexAssignNode);
+
+        IndexAssignNode write = (IndexAssignNode) program.statements().get(1);
+        assertEquals("nums", write.arrayName());
+        assertTrue(write.index() instanceof LiteralNode);
+        assertEquals(Integer.valueOf(1), ((LiteralNode) write.index()).value());
+        assertTrue(write.value() instanceof LiteralNode);
+        assertEquals(Integer.valueOf(10), ((LiteralNode) write.value()).value());
+    }
+
+    @Test
+    void parse_length_returnsLengthNode() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT nums@5, n
+                n = LENGTH nums
+                END SCRIPT
+            """;
+
+        ProgramNode program = parseProgram(source);
+
+        assertEquals(2, program.statements().size());
+        assertTrue(program.statements().get(1) instanceof AssignNode);
+
+        AssignNode assign = (AssignNode) program.statements().get(1);
+        assertEquals("n", assign.variableName());
+        assertTrue(assign.value() instanceof LengthNode);
+        assertEquals("nums", ((LengthNode) assign.value()).arrayName());
+    }
+
+    @Test
+    void parse_indexPrecedence_atBindsTighterThanPlus() {
+        String source = """
+                SCRIPT AREA
+                START SCRIPT
+                DECLARE INT nums@5, x
+                x = nums@1 + 1
+                END SCRIPT
+            """;
+
+        ProgramNode program = parseProgram(source);
+
+        AssignNode assign = (AssignNode) program.statements().get(1);
+
+        // Expect (nums@1) + 1, NOT nums@(1+1)
+        assertTrue(assign.value() instanceof BinaryExpressionNode);
+        BinaryExpressionNode bin = (BinaryExpressionNode) assign.value();
+        assertEquals(TokenType.PLUS, bin.operator());
+        assertTrue(bin.left() instanceof IndexNode);
+        assertEquals("nums", ((IndexNode) bin.left()).arrayName());
+        assertTrue(bin.right() instanceof LiteralNode);
+        assertEquals(Integer.valueOf(1), ((LiteralNode) bin.right()).value());
     }
 
 }

@@ -13,11 +13,14 @@ import com.citu.lexor_interpreter.parser.ast.ForLoopNode;
 import com.citu.lexor_interpreter.parser.ast.RepeatLoopNode;
 import com.citu.lexor_interpreter.parser.ast.StatementNode;
 import com.citu.lexor_interpreter.parser.ast.SwitchNode;
+import com.citu.lexor_interpreter.parser.ast.IndexAssignNode;
 import com.citu.lexor_interpreter.parser.ast.expression.BinaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.LiteralNode;
 import com.citu.lexor_interpreter.parser.ast.expression.NewlineNode;
 import com.citu.lexor_interpreter.parser.ast.expression.UnaryExpressionNode;
 import com.citu.lexor_interpreter.parser.ast.expression.VariableNode;
+import com.citu.lexor_interpreter.parser.ast.expression.IndexNode;
+import com.citu.lexor_interpreter.parser.ast.expression.LengthNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +121,14 @@ public class Parser {
         }
 
         if (match(TokenType.IDENTIFIER)) {
-            return new VariableNode(previous().lexeme());
+            String name = previous().lexeme();
+            if (match(TokenType.AT)) {
+                // Index binds tighter than arithmetic: nums@i+1 == (nums@i)+1.
+                // Use nums@(i+1) for an arithmetic index.
+                ExpressionNode index = parsePrimary();
+                return new IndexNode(name, index);
+            }
+            return new VariableNode(name);
         }
 
         if (match(TokenType.LPAREN)) {
@@ -201,6 +211,10 @@ public class Parser {
         if (match(TokenType.PLUS)) {
             return new UnaryExpressionNode(TokenType.PLUS, parseUnary());
         }
+        if (match(TokenType.LENGTH)) {
+            Token name = consume(TokenType.IDENTIFIER, "expected array name after LENGTH");
+            return new LengthNode(name.lexeme());
+        }
         return parsePrimary();
     }
 
@@ -217,11 +231,21 @@ public class Parser {
 
         do {
             Token name = consume(TokenType.IDENTIFIER, "expected variable name in declaration");
-            ExpressionNode initializer = null;
-            if (match(TokenType.ASSIGN)) {
-                initializer = parseExpression();
+            if (match(TokenType.AT)) {
+                // Array declaration: size must be a positive INT literal.
+                Token sizeToken = consume(TokenType.INT_LITERAL, "expected array size (a positive INT literal) after '@'");
+                int size = Integer.parseInt(sizeToken.lexeme());
+                if (size <= 0) {
+                    throw error("array size must be a positive integer");
+                }
+                declarations.add(new DeclareNode.Declaration(name.lexeme(), null, size));
+            } else {
+                ExpressionNode initializer = null;
+                if (match(TokenType.ASSIGN)) {
+                    initializer = parseExpression();
+                }
+                declarations.add(new DeclareNode.Declaration(name.lexeme(), initializer, null));
             }
-            declarations.add(new DeclareNode.Declaration(name.lexeme(), initializer));
         } while (match(TokenType.COMMA));
 
         return new DeclareNode(typeToken.type(), declarations);
@@ -318,11 +342,25 @@ public class Parser {
             return parseScanStatement();
         }
 
+        if (check(TokenType.IDENTIFIER) && peekNext().type() == TokenType.AT) {
+            return List.of(parseIndexAssignment());
+        }
+
         if (check(TokenType.IDENTIFIER) && peekNext().type() == TokenType.ASSIGN) {
             return parseAssignmentStatement();
         }
 
         throw error("expected executable statement");
+    }
+
+    // name @ index = value
+    private IndexAssignNode parseIndexAssignment() {
+        Token name = consume(TokenType.IDENTIFIER, "expected array name");
+        consume(TokenType.AT, "expected '@' for array index");
+        ExpressionNode index = parsePrimary();
+        consume(TokenType.ASSIGN, "expected '=' in array element assignment");
+        ExpressionNode value = parseExpression();
+        return new IndexAssignNode(name.lexeme(), index, value);
     }
 
     // -------------------------------------------------------------------------

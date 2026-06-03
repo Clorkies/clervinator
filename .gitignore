@@ -31,6 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
-
+/docs/superpowers/
 /lexor-feature-switch
 /.gemini

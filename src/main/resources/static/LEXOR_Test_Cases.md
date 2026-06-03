@@ -1003,3 +1003,90 @@ END IF
 
 END SCRIPT
 ```
+
+## Increment 6
+
+#### TC-68 - Declare an array and print a default element
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT nums@3
+PRINT: nums@0
+END SCRIPT
+```
+
+#### TC-69 - Assign and read array elements
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT nums@3
+nums@0 = 10
+nums@1 = 20
+nums@2 = 30
+PRINT: nums@0 & " " & nums@1 & " " & nums@2
+END SCRIPT
+```
+
+#### TC-70 - Get array length with LENGTH
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT nums@5
+PRINT: LENGTH nums
+END SCRIPT
+```
+
+#### TC-71 - Fill an array with a FOR loop
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT nums@5
+DECLARE INT i
+FOR (i=0, i < LENGTH nums, i=i+1)
+START FOR
+nums@i = i * 2
+END FOR
+PRINT: nums@0 & " " & nums@2 & " " & nums@4
+END SCRIPT
+```
+
+#### TC-72 - Sum array elements with a loop
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE INT nums@4
+DECLARE INT i, sum=0
+nums@0 = 1
+nums@1 = 2
+nums@2 = 3
+nums@3 = 4
+FOR (i=0, i < LENGTH nums, i=i+1)
+START FOR
+sum = sum + nums@i
+END FOR
+PRINT: "Sum: " & sum
+END SCRIPT
+```
+
+#### TC-73 - FLOAT array
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE FLOAT temps@2
+temps@0 = 36.5
+temps@1 = 37
+PRINT: temps@0 & " " & temps@1
+END SCRIPT
+```
+
+#### TC-74 - CHAR array
+```lexor
+SCRIPT AREA
+START SCRIPT
+DECLARE CHAR vowels@3
+vowels@0 = 'a'
+vowels@1 = 'e'
+vowels@2 = 'i'
+PRINT: vowels@0 & vowels@1 & vowels@2
+END SCRIPT
+```

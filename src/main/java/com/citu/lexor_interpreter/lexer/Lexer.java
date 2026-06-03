@@ -30,6 +30,7 @@ public class Lexer {
         Map.entry("SWITCH", TokenType.SWITCH),
         Map.entry("CASE", TokenType.CASE),
         Map.entry("DEFAULT", TokenType.DEFAULT),
+        Map.entry("LENGTH", TokenType.LENGTH),
         
         Map.entry("START_SCRIPT", TokenType.START_SCRIPT),
         Map.entry("END_SCRIPT", TokenType.END_SCRIPT),
@@ -95,6 +96,7 @@ public class Lexer {
             case ')' -> addToken(TokenType.RPAREN, ")");
             case '&' -> addToken(TokenType.CONCAT, "&");
             case '$' -> addToken(TokenType.NEWLINE, "$");
+            case '@' -> addToken(TokenType.AT, "@");
             case '+' -> addToken(TokenType.PLUS, "+");
             case '-' -> addToken(TokenType.MINUS, "-");
             case '*' -> addToken(TokenType.MULTIPLY, "*");

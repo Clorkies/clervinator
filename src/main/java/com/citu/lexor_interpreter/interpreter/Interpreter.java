@@ -42,6 +42,8 @@ public class Interpreter {
             executeDeclare(node);
         } else if (statement instanceof AssignNode node) {
             executeAssign(node);
+        } else if (statement instanceof IndexAssignNode node) {
+            executeIndexAssign(node);
         } else if (statement instanceof PrintNode node) {
             executePrint(node);
         } else if (statement instanceof ScanNode node) {
@@ -146,6 +148,10 @@ public class Interpreter {
     // DECLARE
     private void executeDeclare(DeclareNode node) {
         for (DeclareNode.Declaration decl : node.declarations()) {
+            if (decl.arraySize() != null) {
+                environment.declareArray(decl.name(), node.type(), decl.arraySize());
+                continue;
+            }
             environment.declare(decl.name(), node.type());
             if (decl.initializer() != null) {
                 Object value = evaluate(decl.initializer());
@@ -158,6 +164,22 @@ public class Interpreter {
     private void executeAssign(AssignNode node) {
         Object value = evaluate(node.value());
         environment.assign(node.variableName(), value);
+    }
+
+    // Array element assignment: name @ index = value
+    private void executeIndexAssign(IndexAssignNode node) {
+        int index = evaluateIndex(node.index());
+        Object value = evaluate(node.value());
+        environment.setElement(node.arrayName(), index, value);
+    }
+
+    // Evaluates an array index expression, requiring it to be an INT.
+    private int evaluateIndex(ExpressionNode indexExpr) {
+        Object idx = evaluate(indexExpr);
+        if (!(idx instanceof Integer)) {
+            throw new ParserException("IndexError: array index must be INT");
+        }
+        return (Integer) idx;
     }
 
     // PRINT
@@ -216,6 +238,8 @@ public class Interpreter {
     private Object evaluate(ExpressionNode expression) {
         if (expression instanceof LiteralNode node) return node.value();
         if (expression instanceof VariableNode node) return environment.get(node.name());
+        if (expression instanceof IndexNode node) return environment.getElement(node.arrayName(), evaluateIndex(node.index()));
+        if (expression instanceof LengthNode node) return environment.getArrayLength(node.arrayName());
         if (expression instanceof UnaryExpressionNode node) return evaluateUnary(node);
         if (expression instanceof BinaryExpressionNode node) return evaluateBinary(node);
         throw new ParserException("Unknown expression type: " + expression.getClass().getSimpleName());

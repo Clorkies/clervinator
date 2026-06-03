@@ -2,5 +2,5 @@ package com.citu.lexor_interpreter.parser.ast;
 
 
 public sealed interface StatementNode extends AstNode
-    permits ProgramNode, DeclareNode, AssignNode, PrintNode, ScanNode, IfNode, ForLoopNode, RepeatLoopNode, SwitchNode {
+    permits ProgramNode, DeclareNode, AssignNode, IndexAssignNode, PrintNode, ScanNode, IfNode, ForLoopNode, RepeatLoopNode, SwitchNode {
 }

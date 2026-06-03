@@ -910,6 +910,7 @@
                         <button type="button" class="increment-btn" data-increment="3" id="inc-btn-3">Increment 3</button>
                         <button type="button" class="increment-btn" data-increment="4" id="inc-btn-4">Increment 4</button>
                         <button type="button" class="increment-btn" data-increment="5" id="inc-btn-5">Switch Case</button>
+                        <button type="button" class="increment-btn" data-increment="6" id="inc-btn-6">Arrays</button>
                     </div>
                 </div>
                 <div class="ml-auto flex items-center gap-2 flex-wrap">
@@ -1578,7 +1579,7 @@ END SCRIPT
                 const increment = Number(this.getAttribute('data-increment'));
                 if (!increment) return;
 
-                if (increment === 1 || increment === 2 || increment === 3 || increment === 4 || increment === 5) {
+                if (increment === 1 || increment === 2 || increment === 3 || increment === 4 || increment === 5 || increment === 6) {
                     await openTcPicker(increment, this);
                     return;
                 }

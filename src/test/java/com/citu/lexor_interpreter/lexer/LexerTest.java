@@ -243,6 +243,43 @@ class LexerTest {
         );
     }
 
+    @Test
+    void lex_arrayDeclarationAndIndex_atToken() {
+        String source = """
+            DECLARE INT nums@5
+            nums@0 = 10
+            """;
+
+        List<Token> tokens = new Lexer().lex(source);
+
+        assertTokenTypes(tokens,
+            TokenType.DECLARE,
+            TokenType.INT_TYPE,
+            TokenType.IDENTIFIER,
+            TokenType.AT,
+            TokenType.INT_LITERAL,
+            TokenType.IDENTIFIER,
+            TokenType.AT,
+            TokenType.INT_LITERAL,
+            TokenType.ASSIGN,
+            TokenType.INT_LITERAL,
+            TokenType.EOF
+        );
+    }
+
+    @Test
+    void lex_lengthKeyword() {
+        String source = "LENGTH nums";
+
+        List<Token> tokens = new Lexer().lex(source);
+
+        assertTokenTypes(tokens,
+            TokenType.LENGTH,
+            TokenType.IDENTIFIER,
+            TokenType.EOF
+        );
+    }
+
     private static void assertTokenTypes(List<Token> tokens, TokenType... expected) {
         assertEquals(expected.length, tokens.size(), "Token count mismatch");
         for (int i = 0; i < expected.length; i++) {

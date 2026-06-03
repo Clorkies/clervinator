@@ -23,6 +23,7 @@ public enum TokenType {
     END_SWITCH,
     CASE,
     DEFAULT,
+    LENGTH,
 
     // Data Types
     INT_TYPE,
@@ -66,6 +67,7 @@ public enum TokenType {
     COMMA,           // ,
     LPAREN,          // (
     RPAREN,          // )
+    AT,              // @  (array index / size)
 
     // Literals
     INT_LITERAL,
