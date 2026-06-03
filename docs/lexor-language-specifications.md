@@ -212,6 +212,47 @@ START REPEAT
 END REPEAT
 ```
 
+## Arrays
+
+LEXOR supports fixed-size, single-dimensional arrays of any scalar type (`INT`, `FLOAT`, `CHAR`, `BOOL`). Because square brackets (`[]`) are reserved for escape codes, arrays use the `@` operator for indexing.
+
+### Declaration
+
+Arrays are declared with `@<size>`, where `<size>` is a positive integer literal. Like other declarations, arrays appear immediately after `START SCRIPT`, and every element is initialized to the type's default value (`INT` 0, `FLOAT` 0.0, `CHAR` empty, `BOOL` FALSE).
+
+```text
+DECLARE INT nums@5        %% an array of 5 INTs: [0, 0, 0, 0, 0]
+DECLARE CHAR letters@3    %% an array of 3 CHARs
+```
+
+### Indexing
+
+Elements are accessed with `<arrayName>@<index>`, where `<index>` is any `INT` expression. Indexes are zero-based. The `@` operator binds tighter than arithmetic, so `nums@i+1` means `(nums@i)+1`; use `nums@(i+1)` for an arithmetic index.
+
+```text
+nums@0 = 10               %% write to element 0
+nums@1 = nums@0 + 5       %% read element 0, write element 1
+PRINT: nums@1             %% prints 15
+```
+
+### Length
+
+`LENGTH <arrayName>` returns the number of elements in an array as an `INT`.
+
+```text
+FOR (i=0, i < LENGTH nums, i=i+1)
+START FOR
+    nums@i = i * i
+END FOR
+```
+
+### Rules and errors
+
+- The array size is fixed at declaration; arrays cannot grow or shrink.
+- An index outside the range `0 .. LENGTH-1` is a runtime error.
+- An index expression that is not an `INT` is a runtime error.
+- Assigning a value whose type does not match the array's element type is a runtime error (an `INT` assigned into a `FLOAT` array is coerced, matching scalar `FLOAT` behavior).
+
 ## Note
 
 You may use any language to implement the interpreter except Python and JavaScript.
