@@ -207,6 +207,42 @@ class LexerTest {
         assertTrue(tokens.stream().anyMatch(t -> t.type() == TokenType.STRING_LITERAL && "[".equals(t.literalValue())));
     }
 
+    @Test
+    void lex_switchCase_keywordsAndDelimiters() {
+        String source = """
+            SWITCH (x)
+            START SWITCH
+            CASE 1:
+                PRINT: "one"
+            DEFAULT:
+                PRINT: "other"
+            END SWITCH
+            """;
+
+        List<Token> tokens = new Lexer().lex(source);
+
+        assertTokenTypes(tokens,
+            TokenType.SWITCH,
+            TokenType.LPAREN,
+            TokenType.IDENTIFIER,
+            TokenType.RPAREN,
+            TokenType.START_SWITCH,
+            TokenType.CASE,
+            TokenType.INT_LITERAL,
+            TokenType.COLON,
+            TokenType.PRINT,
+            TokenType.COLON,
+            TokenType.STRING_LITERAL,
+            TokenType.DEFAULT,
+            TokenType.COLON,
+            TokenType.PRINT,
+            TokenType.COLON,
+            TokenType.STRING_LITERAL,
+            TokenType.END_SWITCH,
+            TokenType.EOF
+        );
+    }
+
     private static void assertTokenTypes(List<Token> tokens, TokenType... expected) {
         assertEquals(expected.length, tokens.size(), "Token count mismatch");
         for (int i = 0; i < expected.length; i++) {

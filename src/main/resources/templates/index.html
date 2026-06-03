@@ -909,6 +909,7 @@
                         <button type="button" class="increment-btn" data-increment="2" id="inc-btn-2">Increment 2</button>
                         <button type="button" class="increment-btn" data-increment="3" id="inc-btn-3">Increment 3</button>
                         <button type="button" class="increment-btn" data-increment="4" id="inc-btn-4">Increment 4</button>
+                        <button type="button" class="increment-btn" data-increment="5" id="inc-btn-5">Switch Case</button>
                     </div>
                 </div>
                 <div class="ml-auto flex items-center gap-2 flex-wrap">
@@ -1577,7 +1578,7 @@ END SCRIPT
                 const increment = Number(this.getAttribute('data-increment'));
                 if (!increment) return;
 
-                if (increment === 1 || increment === 2 || increment === 3 || increment === 4) {
+                if (increment === 1 || increment === 2 || increment === 3 || increment === 4 || increment === 5) {
                     await openTcPicker(increment, this);
                     return;
                 }
@@ -1835,7 +1836,7 @@ END SCRIPT
                 keywords: [
                     'DECLARE', 'INT', 'CHAR', 'BOOL', 'FLOAT',
                     'PRINT', 'SCAN', 'IF', 'ELSE', 'FOR', 'REPEAT', 'WHEN',
-                    'AND', 'OR', 'NOT', 'TRUE', 'FALSE'
+                    'AND', 'OR', 'NOT', 'TRUE', 'FALSE', "SWITCH"
                 ],
                 operators: [
                     '=', '>', '<', '==', '<=', '>=', '<>',
@@ -1857,6 +1858,8 @@ END SCRIPT
                         [/REPEAT WHEN\b/, 'keyword'],
                         [/START REPEAT\b/, 'keyword'],
                         [/END REPEAT\b/, 'keyword'],
+                        [/START SWITCH\b/, 'keyword'],
+                        [/END SWITCH\b/, 'keyword'],
 
                         // Single word identifiers/keywords
                         [/[a-zA-Z_]\w*/, {
@@ -1923,6 +1926,12 @@ END SCRIPT
             });
 
             setFilename('untitled.lexor');
+            initEditorOutputResizer();
+        });
+    </script>
+</body>
+</html>
+untitled.lexor');
             initEditorOutputResizer();
         });
     </script>

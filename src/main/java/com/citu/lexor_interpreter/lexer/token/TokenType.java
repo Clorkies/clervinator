@@ -18,6 +18,11 @@ public enum TokenType {
     END_IF,
     START_REPEAT,
     END_REPEAT,
+    SWITCH,
+    START_SWITCH,
+    END_SWITCH,
+    CASE,
+    DEFAULT,
 
     // Data Types
     INT_TYPE,

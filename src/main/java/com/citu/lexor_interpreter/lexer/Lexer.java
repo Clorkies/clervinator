@@ -27,6 +27,9 @@ public class Lexer {
         Map.entry("AND", TokenType.AND),
         Map.entry("OR", TokenType.OR),
         Map.entry("NOT", TokenType.NOT),
+        Map.entry("SWITCH", TokenType.SWITCH),
+        Map.entry("CASE", TokenType.CASE),
+        Map.entry("DEFAULT", TokenType.DEFAULT),
         
         Map.entry("START_SCRIPT", TokenType.START_SCRIPT),
         Map.entry("END_SCRIPT", TokenType.END_SCRIPT),
@@ -251,6 +254,10 @@ public class Lexer {
                 addToken(TokenType.START_REPEAT, currentLexeme());
                 return;
             }
+            if (tryReadSecondWord("SWITCH")) {
+                addToken(TokenType.START_SWITCH, currentLexeme());
+                return;
+            }
         } else if ("END".equals(upper) && "END".equals(firstWord)) {
             if (tryReadSecondWord("SCRIPT")) {
                 addToken(TokenType.END_SCRIPT, currentLexeme());
@@ -266,6 +273,10 @@ public class Lexer {
             }
             if (tryReadSecondWord("REPEAT")) {
                 addToken(TokenType.END_REPEAT, currentLexeme());
+                return;
+            }
+            if (tryReadSecondWord("SWITCH")) {
+                addToken(TokenType.END_SWITCH, currentLexeme());
                 return;
             }
         } else if ("ELSE".equals(upper) && "ELSE".equals(firstWord)) {
@@ -380,3 +391,4 @@ public class Lexer {
         return new LexerException(message, new TokenPosition(tokenLine, tokenCol), offendingLexeme);
     }
 }
+
