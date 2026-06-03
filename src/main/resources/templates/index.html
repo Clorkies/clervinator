@@ -1030,6 +1030,70 @@
             </div>
         </section>
 
+        <section id="added-features" class="checkpoint-section mb-5">
+            <div class="checkpoint-header mb-4">
+                <div>
+                    <h2 class="checkpoint-title">Added Features</h2>
+                    <p class="checkpoint-subtitle">
+                        Custom extensions and robust control flow structures added beyond the base LEXOR specification.
+                    </p>
+                </div>
+                <span class="checkpoint-status-chip" style="border-color: rgba(88, 166, 255, 0.45); background: rgba(88, 166, 255, 0.12); color: #a9ceff;">Version 1.1 Enhancements</span>
+            </div>
+
+            <div class="docs-row-two-col">
+                <!-- Arrays Feature Card -->
+                <article class="inc-card inc-current">
+                    <div class="inc-meta mb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="bi bi-diagram-3 text-[var(--accent)] text-lg"></i>
+                            <h3 class="inc-title text-lg">1D Fixed-Sized Arrays</h3>
+                        </div>
+                        <span class="inc-badge pending" style="border-color: rgba(54, 211, 153, 0.6); color: #9df4cc; background: rgba(54, 211, 153, 0.14);">Merged</span>
+                    </div>
+                    <p class="info-card-text mb-4 text-sm leading-relaxed">
+                        Adds fixed-size, single-dimensional arrays for <code>INT</code>, <code>FLOAT</code>, <code>CHAR</code>, and <code>BOOL</code> types. Uses a unique <code>@</code> operator to prevent collisions with escape codes.
+                    </p>
+                    <div class="bg-[var(--bg-editor)] p-3 rounded-lg border border-[var(--border-panel)] mb-3 font-mono text-xs text-gray-300">
+                        DECLARE INT nums @5<br>
+                        nums @0 = 10<br>
+                        PRINT: LENGTH nums
+                    </div>
+                    <ul class="inc-list text-sm">
+                        <li><strong>Declaration:</strong> `name @size` (default-filled)</li>
+                        <li><strong>Indexing:</strong> `name @index` (read/write)</li>
+                        <li><strong>Utility:</strong> `LENGTH name` operator</li>
+                    </ul>
+                </article>
+
+                <!-- Switch Case Feature Card -->
+                <article class="inc-card inc-current">
+                    <div class="inc-meta mb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="bi bi-shuffle text-[var(--accent)] text-lg"></i>
+                            <h3 class="inc-title text-lg">Switch Case Control Flow</h3>
+                        </div>
+                        <span class="inc-badge pending" style="border-color: rgba(54, 211, 153, 0.6); color: #9df4cc; background: rgba(54, 211, 153, 0.14);">Merged</span>
+                    </div>
+                    <p class="info-card-text mb-4 text-sm leading-relaxed">
+                        Introduces a robust multi-way branch selection mechanism with modern "no-fallthrough" execution logic and dynamic runtime expression matching.
+                    </p>
+                    <div class="bg-[var(--bg-editor)] p-3 rounded-lg border border-[var(--border-panel)] mb-3 font-mono text-xs text-gray-300">
+                        SWITCH (val)<br>
+                        START SWITCH<br>
+                        &nbsp;&nbsp;CASE 1: ...<br>
+                        &nbsp;&nbsp;DEFAULT: ...<br>
+                        END SWITCH
+                    </div>
+                    <ul class="inc-list text-sm">
+                        <li><strong>Dynamic Cases:</strong> Evaluates expressions at runtime</li>
+                        <li><strong>Strict Typing:</strong> Validates `Object.equals()` matches</li>
+                        <li><strong>Safety:</strong> Implicit breaks prevent fallthrough bugs</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
         <section id="increment-checkpoint" class="checkpoint-section">
             <div class="checkpoint-header">
                 <div>
@@ -1927,12 +1991,6 @@ END SCRIPT
             });
 
             setFilename('untitled.lexor');
-            initEditorOutputResizer();
-        });
-    </script>
-</body>
-</html>
-untitled.lexor');
             initEditorOutputResizer();
         });
     </script>
